@@ -16,7 +16,7 @@ class SwapCurrencyInput extends Component{
     }
 
     render() {
-        const type = this.props.type;
+        const formType = this.props.formType;
         const tokenAmount = this.props.tokenAmount;
         const tokenBalance = this.props.tokenBalance;
         const tokenName = this.props.tokenName;
@@ -25,7 +25,7 @@ class SwapCurrencyInput extends Component{
             <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl">
                 <legend
                     className="p-1">
-                    {type} Token - <b>{tokenNames[tokenName]}</b>
+                    {formType} Token - <b>{tokenNames[tokenName]}</b>
                 </legend>
                 <input 
                     value={tokenAmount}

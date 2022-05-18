@@ -84,7 +84,7 @@ class SwapPage extends Component{
                     Swap
                 </h2>
                 <SwapCurrencyInput
-                    type = "Source"
+                    formType = "Source"
                     tokenName={sourceTokenName}
                     tokenAmount={sourceTokenAmount}
                     tokenBalance={sourceTokenBalance}
@@ -97,7 +97,7 @@ class SwapPage extends Component{
                     </button>
                 </div>
                 <SwapCurrencyInput
-                    type = "Target"
+                    formType = "Target"
                     tokenName={targetTokenName}
                     tokenAmount={targetTokenAmount}
                     tokenBalance={targetTokenBalance}
