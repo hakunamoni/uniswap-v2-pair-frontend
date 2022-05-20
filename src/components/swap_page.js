@@ -11,14 +11,24 @@ function getTokenBalance(tokenName) {
     return tokenBalance;
 }
 
-function calcSwapAmount(tokenIn, amountIn){
+function calcSwapTargetAmount(tokenIn, amountIn){
     if (Number.isNaN(amountIn) || parseFloat(amountIn) === 0) {
         return 0;
     }
     // const swapAmount =      // _amount1Out = reserve1_.mul(_amount0In).div(reserve0, "UniswapV2Mini: swap: reserve0 is zero");
-    const swapAmount = tokenIn === 'a' ? amountIn / 10 : amountIn * 10;
+    const amountOut = tokenIn === 'a' ? amountIn * 10 : amountIn / 10;
 
-    return swapAmount;
+    return amountOut;
+}
+
+function calcSwapSourceAmount(tokenOut, amountOut){
+    if (Number.isNaN(amountOut) || parseFloat(amountOut) === 0) {
+        return 0;
+    }
+    // const swapAmount =      // _amount1Out = reserve1_.mul(_amount0In).div(reserve0, "UniswapV2Mini: swap: reserve0 is zero");
+    const amountIn = tokenOut === 'a' ? amountOut * 10 : amountOut / 10;
+
+    return amountIn;
 }
 
 function swapTokens(tokenIn, amountIn){
@@ -59,12 +69,13 @@ class SwapPage extends Component{
     }
 
     onSwapButtonClick() {
-        const sourceTokenName = this.state.sourceTokenName;
-        const targetTokenName = sourceTokenName === 'a' ? 'b': 'a';
         const cursorInputPos = this.state.cursorInputPos;
         const cursorInputAmt = this.state.cursorInputAmt;
-        const tokenIn = cursorInputPos === "up" ? sourceTokenName : targetTokenName;
-        swapTokens(tokenIn, cursorInputAmt);
+        const sourceTokenName = this.state.sourceTokenName;
+        const targetTokenName = sourceTokenName === 'a' ? 'b': 'a';
+        const sourceTokenAmount = cursorInputPos === "up" ? cursorInputAmt : calcSwapSourceAmount(targetTokenName, cursorInputAmt);
+
+        swapTokens(sourceTokenName, sourceTokenAmount);
         this.setState({cursorInputAmt: 0});
     }
 
@@ -75,8 +86,8 @@ class SwapPage extends Component{
         const targetTokenName = sourceTokenName === 'a' ? 'b': 'a';
         const sourceTokenBalance = getTokenBalance(sourceTokenName);
         const targetTokenBalance = getTokenBalance(targetTokenName);
-        const sourceTokenAmount = cursorInputPos === "up" ? cursorInputAmt : calcSwapAmount(sourceTokenName, cursorInputAmt);
-        const targetTokenAmount = cursorInputPos === "do" ? cursorInputAmt : calcSwapAmount(targetTokenName, cursorInputAmt);
+        const sourceTokenAmount = cursorInputPos === "up" ? cursorInputAmt : calcSwapSourceAmount(targetTokenName, cursorInputAmt);
+        const targetTokenAmount = cursorInputPos === "do" ? cursorInputAmt : calcSwapTargetAmount(sourceTokenName, cursorInputAmt);
 
         return (
             <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
