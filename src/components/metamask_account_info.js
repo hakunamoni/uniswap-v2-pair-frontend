@@ -2,7 +2,7 @@ import React from "react";
 
 function MetamaskAccountInfo(props) {
     const currentAccount = props.currentAccount;
-    const ethereumBalance = props.ethereumBalance;
+    const ethBalance = props.ethBalance;
     const chainId = props.chainId;
     const chainName = props.chainName;
 
@@ -19,11 +19,11 @@ function MetamaskAccountInfo(props) {
         </p>
         <p 
           className="p-1 text-slate-500">
-          ETH balance: {ethereumBalance}
+          ETH Balance: {ethBalance}
         </p>
         <p 
           className="p-1 text-slate-500">
-          Chain info: chainid-{chainId} chainname-{chainName}
+          Chain Info: ChainId-{chainId} ChainName-{chainName}
         </p>
       </fieldset>
     )

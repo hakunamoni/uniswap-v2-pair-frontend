@@ -7,7 +7,7 @@ class SwapCurrencyInput extends Component{
     }
 
     handleChange(e) {
-        this.props.onCurrencyInputChange(e.target.value);
+        this.props.onChange(e.target.value);
     }
 
     render() {

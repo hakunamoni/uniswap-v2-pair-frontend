@@ -1,337 +1,288 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { ethers } from "ethers";
+import { parseEther } from 'ethers/lib/utils';
 import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
 import SwapCurrencyInput from "./swap_currency_input";
-import { ethers } from "ethers";
-import { parseEther } from 'ethers/lib/utils';
 
 function SwapPage(props) {
-    const currentAccount = props.currentAccount;
-    const addressContract = props.addressContract;
+  const currentAccount = props.currentAccount;
+  const addressContract = props.addressContract;
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const uniswapsigner = new ethers.Contract(addressContract, abiUniswap, signer);
-    const uniswapprovider = new ethers.Contract(addressContract, abiUniswap, provider);
-    // const token_a = new ethers.Contract(tokenAddresses[sourceTokenIden], abiTokenMini, provider);
-    // const token_b = new ethers.Contract(tokenAddresses[targetTokenIden], abiTokenMini, provider);
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
+  const uniswapProvider = new ethers.Contract(addressContract, abiUniswap, provider);
 
-    const tokenAddresses = {
-        a: props.addressTokenA,
-        b: props.addressTokenB
-    };
+  const tokenAddresses = {
+    a: props.addressTokenA,
+    b: props.addressTokenB
+  };
 
-    const [cursorInputPos, setCursorInputPos] = useState("up");
-    // const [cursorInputAmt, setCursorInputAmt] = useState(0);
-    const [sourceTokenIden, setSourceTokenIden] = useState("a");
-    const [targetTokenIden, setTargetTokenIden] = useState("b");
-    const [sourceTokenBalance, setSourceTokenBalance] = useState(undefined);
-    const [targetTokenBalance, setTargetTokenBalance] = useState(undefined);
-    const [sourceTokenAmount, setSourceTokenAmount] = useState(0);
-    const [targetTokenAmount, setTargetTokenAmount] = useState(0);
-    const [sourceTokenName, setSourceTokenName] = useState(undefined);
-    const [targetTokenName, setTargetTokenName] = useState(undefined);
-    const [sourceTokenSymbol, setSourceTokenSymbol] = useState(undefined);
-    const [targetTokenSymbol, setTargetTokenSymbol] = useState(undefined);
+  const [focusInputPos, setFocusInputPos] = useState("up");   // "up" or "do" ("down")
+  const [sourceTkIden, setSourceTkIden] = useState("a");    // "a" or "b"
+  const [targetTkIden, setTargetTkIden] = useState("b");
+  const [sourceTkBal, setSourceTkBal] = useState(undefined);
+  const [targetTkBal, setTargetTkBal] = useState(undefined);
+  const [sourceTkAmt, setSourceTkAmt] = useState(0);
+  const [targetTkAmt, setTargetTkAmt] = useState(0);
+  const [sourceTkName, setSourceTkName] = useState(undefined);
+  const [targetTkName, setTargetTkName] = useState(undefined);
+  const [sourceTkSymbol, setSourceTkSymbol] = useState(undefined);
+  const [targetTkSymbol, setTargetTkSymbol] = useState(undefined);
 
-    async function getSourceTargetBalance(){
-        console.log("getSourceTargetBalance has been called!");
+  useEffect(() => {
+    console.log("useEffect(mount): initialize token normal information");
 
-        const token_a = new ethers.Contract(tokenAddresses[sourceTokenIden], abiTokenMini, provider);
-        const token_b = new ethers.Contract(tokenAddresses[targetTokenIden], abiTokenMini, provider);
+    if(!window.ethereum) return undefined;
 
-        token_a
-        .balanceOf(currentAccount)
-        .then((result)=>{
-            setSourceTokenBalance(ethers.utils.formatEther(result));
-            // setSourceTokenBalance(Number(ethers.utils.formatEther(result)));
-        })
-        .catch('error', console.error);
+    const token_a = new ethers.Contract(tokenAddresses[sourceTkIden], abiTokenMini, provider);
+    const token_b = new ethers.Contract(tokenAddresses[targetTkIden], abiTokenMini, provider);
+    console.log("basic source: " + tokenAddresses[sourceTkIden]);
+    console.log("basic target: " + tokenAddresses[targetTkIden]);
 
-        token_b
-        .balanceOf(currentAccount)
-        .then((result)=>{
-            setTargetTokenBalance(ethers.utils.formatEther(result));
-            // setTargetTokenBalance(Number(ethers.utils.formatEther(result)));
-        })
-        .catch('error', console.error);
+    token_a
+    .name()
+    .then((result)=>{
+      setSourceTkName(result);
+    }).catch('error', console.error);
 
-            uniswapprovider
-            .getReserves()
-            .then((result)=>{
-                console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-                console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-            }).catch('error', console.error);
+    token_a
+    .symbol()
+    .then((result)=>{
+      setSourceTkSymbol(result);
+    }).catch('error', console.error);
 
-        // if (parseInt(r0) === 0 || parseInt(r1) === 0) {
-            // const signer = provider.getSigner();
-            // const uniswapsigner = new ethers.Contract(addressContract, abiUniswap, signer);
-        
-            // uniswapsigner
-            // .addLiquidity(tokenAddresses[sourceTokenIden], parseEther("5.0"), tokenAddresses[targetTokenIden], parseEther("10.0"))
-            // .then((tr) => {
-            //     console.log(`TransactionResponse TX hash: ${tr.hash}`)
-            //     tr.wait().then((receipt)=>{console.log("transfer receipt",receipt)});
-            // })
-            // .catch((e)=>console.log(e));    
-        // }
-    }
+    token_b
+    .name()
+    .then((result)=>{
+      setTargetTkName(result);
+    }).catch('error', console.error);
 
-    async function calcSwapTargetAmount(tokenIdentity, inputAmount){
-        console.log("calc & set SwapTargetAmount has been called!");
- 
-            uniswapprovider
-            .getReserves()
-            .then((result)=>{
-                console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-                console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-            }).catch('error', console.error);
+    token_b
+    .symbol()
+    .then((result)=>{
+      setTargetTkSymbol(result);
+    }).catch('error', console.error);
 
-        console.log(tokenIdentity);
-        console.log(inputAmount);
-        // console.log(cursorInputPos);
+    token_a
+    .balanceOf(addressContract)
+    .then((result)=>{
+      console.log("uniswapProvider token_a: ", ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
+
+    token_b
+    .balanceOf(addressContract)
+    .then((result)=>{
+      console.log("uniswapProvider token_b: ", ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
+  }, []);
+
+  useEffect(()=>{
+    console.log("useEffect: set token balances for currentAccount");
     
-        uniswapprovider
-        .getSwapTargetAmount(tokenAddresses[tokenIdentity], parseEther(inputAmount))
-        .then((result)=>{
-            setTargetTokenAmount(ethers.utils.formatEther(result));
-            // setTargetTokenAmount(Number(ethers.utils.formatEther(result)));
-            console.log(ethers.utils.formatEther(result));
-        })
-        .catch('error', console.error);
+    if(!window.ethereum) return undefined;
+    if(!currentAccount) {
+      setSourceTkBal(0);
+      setTargetTkBal(0);
+      return undefined;
     }
 
-    async function calcSwapSourceAmount(tokenIdentity, inputAmount){
-        console.log("calc & set SwapSourceAmount has been called!");
-       
-            uniswapprovider
-            .getReserves()
-            .then((result)=>{
-                console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-                console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-            }).catch('error', console.error);
+    updateTokenBalances();
+  },[currentAccount])
 
-        console.log(tokenIdentity);
-        console.log(inputAmount);
-        // console.log(cursorInputPos);
+  const handleSourceTkAmtChange = (inputAmount) => {
+    console.log("handleChange for source token input: calc & set SwapTargetAmount");
 
-        uniswapprovider
-        .getSwapSourceAmount(tokenAddresses[tokenIdentity], parseEther(inputAmount))
-        .then((result)=>{
-            setSourceTokenAmount(ethers.utils.formatEther(result));
-            // setSourceTokenAmount(Number(ethers.utils.formatEther(result)));
-            console.log(ethers.utils.formatEther(result));
-        })
-        .catch('error', console.error);
+    if(!window.ethereum) return undefined;
+
+    setFocusInputPos("up");
+    calcSwapTargetAmount(sourceTkIden, inputAmount);
+    setSourceTkAmt(inputAmount);
+  };
+
+  const handleTargetTkAmtChange = (inputAmount) => {
+    console.log("handleChange for target token input: calc & set SwapSourceAmount");
+    
+    if(!window.ethereum) return undefined;
+    
+    setFocusInputPos("do");
+    calcSwapSourceAmount(targetTkIden, inputAmount);
+    setTargetTkAmt(inputAmount);
+  };
+
+  const onDirectionClick = () => {
+    console.log("onClick for direction: replace token normal info, calc & set related SwapAmount");
+
+    if(!window.ethereum) return undefined;
+
+    setSourceTkName(targetTkName);
+    setTargetTkName(sourceTkName);
+
+    setSourceTkBal(targetTkBal);
+    setTargetTkBal(sourceTkBal);
+
+    setSourceTkIden(targetTkIden);
+    setTargetTkIden(sourceTkIden);
+
+    setSourceTkSymbol(targetTkSymbol);
+    setTargetTkSymbol(sourceTkSymbol);
+
+    if (focusInputPos == "up") {
+      setFocusInputPos("do");
+      calcSwapSourceAmount(sourceTkIden, sourceTkAmt);
+      setTargetTkAmt(sourceTkAmt);
+    } else {
+      setFocusInputPos("up");
+      calcSwapTargetAmount(targetTkIden, targetTkAmt);
+      setSourceTkAmt(targetTkAmt);
     }
+  };
 
-    //called only once
-    useEffect(() => {
-        console.log("useEffect for mount has been called!");
+  const onDoSwapClick = () => {
+    console.log("onClick for swap: swap tokens");
 
-        if(!window.ethereum) return undefined;
+    uniswapSigner
+    .swap(tokenAddresses[sourceTkIden], parseEther(sourceTkAmt))
+    .then((tr) => {
+      console.log(`TransactionResponse TX hash: ${tr.hash}`)
+      tr.wait().then((receipt)=>{
+        console.log("transfer receipt",receipt);
 
-        const token_a = new ethers.Contract(tokenAddresses[sourceTokenIden], abiTokenMini, provider);
-        const token_b = new ethers.Contract(tokenAddresses[targetTokenIden], abiTokenMini, provider);
-        console.log("basic source: " + tokenAddresses[sourceTokenIden]);
-        console.log("basic target: " + tokenAddresses[targetTokenIden]);
+        updateTokenBalances();
+        setSourceTkAmt(0);
+        setTargetTkAmt(0);
+      });
+    })
+    .catch('error', console.error);
+  };
 
-        token_a
-        .name()
-        .then((result)=>{
-            setSourceTokenName(result);
-        }).catch('error', console.error);
+  async function updateTokenBalances(){
+    console.log("function: update source,target token balances");
 
-        token_a
-        .symbol()
-        .then((result)=>{
-            setSourceTokenSymbol(result);
-        }).catch('error', console.error);
+    const token_a = new ethers.Contract(tokenAddresses[sourceTkIden], abiTokenMini, provider);
+    const token_b = new ethers.Contract(tokenAddresses[targetTkIden], abiTokenMini, provider);
 
-        token_b
-        .name()
-        .then((result)=>{
-            setTargetTokenName(result);
-        }).catch('error', console.error);
+    token_a
+    .balanceOf(currentAccount)
+    .then((result)=>{
+      setSourceTkBal(ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
 
-        token_b
-        .symbol()
-        .then((result)=>{
-            setTargetTokenSymbol(result);
-        }).catch('error', console.error);
+    token_b
+    .balanceOf(currentAccount)
+    .then((result)=>{
+      setTargetTkBal(ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
 
-        token_a
-        .balanceOf(addressContract)
-        .then((result)=>{
-            console.log("uniswapprovider token_a: ", ethers.utils.formatEther(result));
-            // setTargetTokenBalance(Number(ethers.utils.formatEther(result)))
-        })
-        .catch('error', console.error);
+    // uniswapProvider
+    // .getReserves()
+    // .then((result)=>{
+    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
+    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
+    // }).catch('error', console.error);
 
-        token_b
-        .balanceOf(addressContract)
-        .then((result)=>{
-            console.log("uniswapprovider token_b: ", ethers.utils.formatEther(result));
-            // setTargetTokenBalance(Number(ethers.utils.formatEther(result)))
-        })
-        .catch('error', console.error);
+    // if (parseInt(r0) === 0 || parseInt(r1) === 0) {
+      // const signer = provider.getSigner();
+      // const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
+  
+      // uniswapSigner
+      // .addLiquidity(tokenAddresses[sourceTkIden], parseEther("5.0"), tokenAddresses[targetTkIden], parseEther("10.0"))
+      // .then((tr) => {
+      //     console.log(`TransactionResponse TX hash: ${tr.hash}`)
+      //     tr.wait().then((receipt)=>{console.log("transfer receipt",receipt)});
+      // })
+      // .catch((e)=>console.log(e));    
+    // }
+  }
 
+  async function calcSwapTargetAmount(tokenIdentifier, inputAmount){
+    console.log("function: calc & set SwapTargetAmount");
 
-    }, []);
+    // uniswapProvider
+    // .getReserves()
+    // .then((result)=>{
+    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
+    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
+    // }).catch('error', console.error);
 
-    // useEffect(()=>{
-    //     console.log("useEffect for cursorInputAmt in swap_page has been called!");
-       
-    //     if(!window.ethereum) return undefined;
-    //     // if(!currentAccount) {
-    //     //     setSourceTokenBalance(undefined);
-    //     //     setTargetTokenBalance(undefined);
-    //     //     return undefined;
-    //     // } else {
-    //     //     getSourceTargetBalance(window)
-            
-    //     // }
+    console.log(tokenIdentifier);
+    console.log(inputAmount);
+    // console.log(focusInputPos);
 
-    //     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    //     const uniswapprovider = new ethers.Contract(addressContract, abiUniswap, provider);
+    uniswapProvider
+    .getSwapTargetAmount(tokenAddresses[tokenIdentifier], parseEther(inputAmount))
+    .then((result)=>{
+      setTargetTkAmt(ethers.utils.formatEther(result));
+      console.log(ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
+  }
 
-    //     uniswapprovider
-    //     .balanceOf(currentAccount)
-    //     .then((result)=>{
-    //         setSourceTokenBalance(Number(ethers.utils.formatEther(result)))
-    //     })
-    //     .catch('error', console.error);
-    // },[cursorInputAmt])
+  async function calcSwapSourceAmount(tokenIdentifier, inputAmount){
+    console.log("function: calc & set SwapSourceAmount");
+    
+    // uniswapProvider
+    // .getReserves()
+    // .then((result)=>{
+    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
+    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
+    // }).catch('error', console.error);
 
-    useEffect(()=>{
-        console.log("useEffect for currentAccount in swap_page has been called!");
-       
-        if(!window.ethereum) return undefined;
-        if(!currentAccount) {
-            setSourceTokenBalance(0);
-            setTargetTokenBalance(0);
-            return undefined;
-        }
+    console.log(tokenIdentifier);
+    console.log(inputAmount);
+    // console.log(focusInputPos);
 
-        getSourceTargetBalance();
-    },[currentAccount])
+    uniswapProvider
+    .getSwapSourceAmount(tokenAddresses[tokenIdentifier], parseEther(inputAmount))
+    .then((result)=>{
+      setSourceTkAmt(ethers.utils.formatEther(result));
+      console.log(ethers.utils.formatEther(result));
+    })
+    .catch('error', console.error);
+  }
 
-    const onChangeSourceTokenAmount = (inputAmount) => {
-        console.log("Changed Source Token Amount");
-
-        if(!window.ethereum) return undefined;
-
-        setCursorInputPos("up");
-        calcSwapTargetAmount(sourceTokenIden, inputAmount);
-        setSourceTokenAmount(inputAmount);
-    };
-
-    const onChangeTargetTokenAmount = (inputAmount) => {
-        console.log("Changed Target Token Amount");
-       
-        if(!window.ethereum) return undefined;
-        
-        setCursorInputPos("do");
-        calcSwapSourceAmount(targetTokenIden, inputAmount);
-        setTargetTokenAmount(inputAmount);
-    };
-
-    const onClickDirectionButton = () => {
-        console.log("Changed Token Direction");
-
-        if(!window.ethereum) return undefined;
-
-        const newTargetTokenName = sourceTokenName;
-        setSourceTokenName(targetTokenName);
-        setTargetTokenName(newTargetTokenName);
-
-        const newTargetTokenBalance = sourceTokenBalance;
-        setSourceTokenBalance(targetTokenBalance);
-        setTargetTokenBalance(newTargetTokenBalance);
-
-        const newTargetTokenIden = sourceTokenIden;
-        setSourceTokenIden(targetTokenIden);
-        setTargetTokenIden(newTargetTokenIden);
-
-        const newTargetTokenSymbol = sourceTokenSymbol;
-        setSourceTokenSymbol(targetTokenSymbol);
-        setTargetTokenSymbol(newTargetTokenSymbol);
-
-        // const newCursorInputPos = cursorInputPos == "up" ? "do" : "up";
-        // console.log(cursorInputPos);
-        // console.log(newCursorInputPos);
-
-        if (cursorInputPos == "up") {
-            setCursorInputPos("do");
-            // setCursorInputPos(newCursorInputPos);
-            calcSwapSourceAmount(sourceTokenIden, sourceTokenAmount);
-            setTargetTokenAmount(sourceTokenAmount);
-        } else {
-            setCursorInputPos("up");
-            // setCursorInputPos(newCursorInputPos);
-            calcSwapTargetAmount(targetTokenIden, targetTokenAmount);
-            setSourceTokenAmount(targetTokenAmount);
-        }
-        
-        // console.log("source: " + tokenAddresses[sourceTokenIden]);
-        // console.log("target: " + tokenAddresses[targetTokenIden]);
-    };
-
-    const onClickSwapButton = () => {
-        console.log("Click Swap Button");
-
-        uniswapsigner
-        .swap(tokenAddresses[sourceTokenIden], parseEther(sourceTokenAmount))
-        .then((tr) => {
-            console.log(`TransactionResponse TX hash: ${tr.hash}`)
-            tr.wait().then((receipt)=>{
-                console.log("transfer receipt",receipt);
-                getSourceTargetBalance();
-                setSourceTokenAmount(0);
-                setTargetTokenAmount(0);
-            });
-        })
-        .catch('error', console.error);
-
-    };
-
-    return (
-        <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
-            <h2 className="text-center text-2xl">
-                Swap
-            </h2>
-            <SwapCurrencyInput
-                formType = "Source"
-                tokenName={sourceTokenName}
-                tokenSymbol={sourceTokenSymbol}
-                tokenAmount={sourceTokenAmount}
-                tokenBalance={sourceTokenBalance}
-                onCurrencyInputChange={onChangeSourceTokenAmount} />
-            <div className='w-full flex'>
-                <button
-                    className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
-                    onClick = {onClickDirectionButton}>
-                    <b>&darr;</b>
-                </button>
-            </div>
-            <SwapCurrencyInput
-                formType = "Target"
-                tokenName={targetTokenName}
-                tokenSymbol={targetTokenSymbol}
-                tokenAmount={targetTokenAmount}
-                tokenBalance={targetTokenBalance}
-                onCurrencyInputChange={onChangeTargetTokenAmount} />
-            {currentAccount
-                ?   <button
-                        className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-                        disabled={sourceTokenAmount === 0 || targetTokenAmount === 0}
-                        onClick = {onClickSwapButton}>
-                        <b>Swap</b>
-                    </button>
-                :   <></>
-            }
-        </div>
-    )
+  return (
+    <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
+      <h2 className="text-center text-2xl">
+        Swap
+      </h2>
+      <SwapCurrencyInput
+        formType = "Source"
+        tokenName={sourceTkName}
+        tokenSymbol={sourceTkSymbol}
+        tokenAmount={sourceTkAmt}
+        tokenBalance={sourceTkBal}
+        onChange={handleSourceTkAmtChange} />
+      <div className='w-full flex'>
+        <button
+          className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
+          onClick = {onDirectionClick}>
+          <b>&darr;</b>
+        </button>
+      </div>
+      <SwapCurrencyInput
+        formType = "Target"
+        tokenName={targetTkName}
+        tokenSymbol={targetTkSymbol}
+        tokenAmount={targetTkAmt}
+        tokenBalance={targetTkBal}
+        onChange={handleTargetTkAmtChange} />
+      {currentAccount
+        ? <button
+            className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
+            disabled={sourceTkAmt === 0 || targetTkAmt === 0}
+            onClick = {onDoSwapClick}>
+            <b>Swap</b>
+          </button>
+        : <></>
+      }
+    </div>
+  )
 }
 
 export default SwapPage;
