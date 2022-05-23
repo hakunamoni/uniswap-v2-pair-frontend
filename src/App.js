@@ -37,14 +37,14 @@ function App() {
     });
   }, [currentAccount]);
 
-  const onSwapPageClick = () => {
+  const handleSwapPageClick = () => {
     setSwapPool(true);
   };
-  const onPoolPageClick = () => {
+  const handlePoolPageClick = () => {
     setSwapPool(false);
   };
 
-  const onConnectMetamaskClick = () => {
+  const handleConnectMetamask = () => {
     console.log("onClick: connect Metamask");
 
     if(!window.ethereum) {
@@ -66,7 +66,7 @@ function App() {
 
   };
 
-  const onDisconnectMetamaskClick = () => {
+  const handleDisconnectMetamask = () => {
     console.log("onClick: disconnect Metamask");
     setEthBalance(undefined);
     setCurrentAccount(undefined);
@@ -80,12 +80,12 @@ function App() {
     
       <div className="m-5 p-2 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
         <button
-          onClick={onSwapPageClick}
+          onClick={handleSwapPageClick}
           className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
           <b>Swap</b>
         </button>
         <button
-          onClick={onPoolPageClick}
+          onClick={handlePoolPageClick}
           className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
           <b>Pool</b>
         </button>
@@ -93,35 +93,35 @@ function App() {
 
       <div className="p-3">
         {isSwapPool
-          ? <SwapPage
-              currentAccount = {currentAccount}
-              addressContract = {SWAPCONTRACT_ADDR}
-              addressTokenA = {TOKENA_ADDR}
-              addressTokenB = {TOKENB_ADDR}/>
-          : <button>Pool</button>
+        ? <SwapPage
+            currentAccount = {currentAccount}
+            addressContract = {SWAPCONTRACT_ADDR}
+            addressTokenA = {TOKENA_ADDR}
+            addressTokenB = {TOKENB_ADDR}/>
+        : <button>Pool</button>
         }
       </div>
 
       <div className="mt-5 p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
         {currentAccount
-          ? <button
-              className='p-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-              onClick = {onDisconnectMetamaskClick}>
-              <b>Disconnect MetaMask</b>
-            </button>
-          : <button
-              className='w-full p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-              onClick = {onConnectMetamaskClick}>
-              <b>Connect MetaMask</b>
-            </button>
+        ? <button
+            className='p-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
+            onClick = {handleDisconnectMetamask}>
+            <b>Disconnect MetaMask</b>
+          </button>
+        : <button
+            className='w-full p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
+            onClick = {handleConnectMetamask}>
+            <b>Connect MetaMask</b>
+          </button>
         }
         {currentAccount
-          ? <MetamaskAccountInfo 
-              currentAccount = {currentAccount}
-              ethBalance = {ethBalance}
-              chainId = {chainId}
-              chainName = {chainName}/>
-          : <div className="w-96"></div>
+        ? <MetamaskAccountInfo 
+            currentAccount = {currentAccount}
+            ethBalance = {ethBalance}
+            chainId = {chainId}
+            chainName = {chainName}/>
+        : <div className="w-96"></div>
         }
       </div>
 

@@ -93,8 +93,8 @@ function SwapPage(props) {
     updateTokenBalances();
   },[currentAccount])
 
-  const handleSourceTkAmtChange = (inputAmount) => {
-    console.log("handleChange for source token input: calc & set SwapTargetAmount");
+  const handleSourceTkAmount = (inputAmount) => {
+    console.log("change on source token input: calc & set SwapTargetAmount");
 
     if(!window.ethereum) return undefined;
 
@@ -103,8 +103,8 @@ function SwapPage(props) {
     setSourceTkAmt(inputAmount);
   };
 
-  const handleTargetTkAmtChange = (inputAmount) => {
-    console.log("handleChange for target token input: calc & set SwapSourceAmount");
+  const handleTargetTkAmount = (inputAmount) => {
+    console.log("change on target token input: calc & set SwapSourceAmount");
     
     if(!window.ethereum) return undefined;
     
@@ -113,8 +113,8 @@ function SwapPage(props) {
     setTargetTkAmt(inputAmount);
   };
 
-  const onDirectionClick = () => {
-    console.log("onClick for direction: replace token normal info, calc & set related SwapAmount");
+  const handleDirectionClick = () => {
+    console.log("click on direction button: replace token normal info, calc & set related SwapAmount");
 
     if(!window.ethereum) return undefined;
 
@@ -141,8 +141,8 @@ function SwapPage(props) {
     }
   };
 
-  const onDoSwapClick = () => {
-    console.log("onClick for swap: swap tokens");
+  const handleDoSwapClick = () => {
+    console.log("click on swap button: swap tokens");
 
     uniswapSigner
     .swap(tokenAddresses[sourceTkIden], parseEther(sourceTkAmt))
@@ -257,11 +257,11 @@ function SwapPage(props) {
         tokenSymbol={sourceTkSymbol}
         tokenAmount={sourceTkAmt}
         tokenBalance={sourceTkBal}
-        onChange={handleSourceTkAmtChange} />
+        onTokenAmountChange={handleSourceTkAmount} />
       <div className='w-full flex'>
         <button
           className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
-          onClick = {onDirectionClick}>
+          onClick = {handleDirectionClick}>
           <b>&darr;</b>
         </button>
       </div>
@@ -271,12 +271,12 @@ function SwapPage(props) {
         tokenSymbol={targetTkSymbol}
         tokenAmount={targetTkAmt}
         tokenBalance={targetTkBal}
-        onChange={handleTargetTkAmtChange} />
+        onTokenAmountChange={handleTargetTkAmount} />
       {currentAccount
         ? <button
             className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
             disabled={sourceTkAmt === 0 || targetTkAmt === 0}
-            onClick = {onDoSwapClick}>
+            onClick = {handleDoSwapClick}>
             <b>Swap</b>
           </button>
         : <></>

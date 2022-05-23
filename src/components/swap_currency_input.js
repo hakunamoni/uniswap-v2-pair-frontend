@@ -3,11 +3,11 @@ import React, {Component} from 'react';
 class SwapCurrencyInput extends Component{
     constructor(props) {
         super(props);
-        this.handleChange = this.handleChange.bind(this);
+        this.handleTokenInputChange = this.handleTokenInputChange.bind(this);
     }
 
-    handleChange(e) {
-        this.props.onChange(e.target.value);
+    handleTokenInputChange(e) {
+        this.props.onTokenAmountChange(e.target.value);
     }
 
     render() {
@@ -25,7 +25,7 @@ class SwapCurrencyInput extends Component{
                 </legend>
                 <input 
                     value={tokenAmount}
-                    onChange={this.handleChange}
+                    onChange={this.handleTokenInputChange}
                     className='p-1 border-2 border-white w-full bg-slate-100 rounded-xl' />
                 <p 
                     className="p-1 text-slate-500">
