@@ -5,10 +5,10 @@ import SwapPage from "./components/swap_page";
 import MetamaskAccountInfo from "./components/metamask_account_info";
 import { ethers } from "ethers";
 
-const INFURA_KEY = "c303c2e21a314ab6abd7a092e39c151c";
-const SWAPCONTRACT_ADDR = "c303c2e21a314ab6abd7a092e39c151c";
-const TOKENA_ADDR = "c303c2e21a314ab6abd7a092e39c151c";
-const TOKENB_ADDR = "c303c2e21a314ab6abd7a092e39c151c";
+// const INFURA_KEY = "c303c2e21a314ab6abd7a092e39c151c";
+const SWAPCONTRACT_ADDR = "0x1B2E11C5BD2ED293d708721cc54ba9b462F0e86C";
+const TOKENA_ADDR = "0x5eCf1D97D196c1590b30E2D5B4e00449C797cA3b";
+const TOKENB_ADDR = "0x258B5D555a1522883Ff8E923DfdB688160f94Ac4";
 
 // // // put the infura id in the .env file.
 // const provider = new ethers.getDefaultProvider("ropsten", {
@@ -39,6 +39,8 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("useEffect for currentAccount in App.js has been called!");
+    
     if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return undefined;
 
     // client side code
@@ -113,7 +115,12 @@ function App() {
 
       <div className="p-3">
         {isSwapPool
-          ? <SwapPage/>
+          ? <SwapPage
+              currentAccount = {currentAccount}
+              addressContract = {SWAPCONTRACT_ADDR}
+              addressTokenA = {TOKENA_ADDR}
+              addressTokenB = {TOKENB_ADDR}
+            />
           : <button>Pool</button>
         }
       </div>
