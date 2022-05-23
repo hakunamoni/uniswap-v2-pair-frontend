@@ -43,14 +43,16 @@ function SwapPage(props) {
         token_a
         .balanceOf(currentAccount)
         .then((result)=>{
-            setSourceTokenBalance(Number(ethers.utils.formatEther(result)))
+            setSourceTokenBalance(ethers.utils.formatEther(result));
+            // setSourceTokenBalance(Number(ethers.utils.formatEther(result)));
         })
         .catch('error', console.error);
 
         token_b
         .balanceOf(currentAccount)
         .then((result)=>{
-            setTargetTokenBalance(Number(ethers.utils.formatEther(result)))
+            setTargetTokenBalance(ethers.utils.formatEther(result));
+            // setTargetTokenBalance(Number(ethers.utils.formatEther(result)));
         })
         .catch('error', console.error);
 
@@ -92,7 +94,8 @@ function SwapPage(props) {
         uniswapprovider
         .getSwapTargetAmount(tokenAddresses[tokenIdentity], parseEther(inputAmount))
         .then((result)=>{
-            setTargetTokenAmount(Number(ethers.utils.formatEther(result)));
+            setTargetTokenAmount(ethers.utils.formatEther(result));
+            // setTargetTokenAmount(Number(ethers.utils.formatEther(result)));
             console.log(ethers.utils.formatEther(result));
         })
         .catch('error', console.error);
@@ -115,7 +118,8 @@ function SwapPage(props) {
         uniswapprovider
         .getSwapSourceAmount(tokenAddresses[tokenIdentity], parseEther(inputAmount))
         .then((result)=>{
-            setSourceTokenAmount(Number(ethers.utils.formatEther(result)));
+            setSourceTokenAmount(ethers.utils.formatEther(result));
+            // setSourceTokenAmount(Number(ethers.utils.formatEther(result)));
             console.log(ethers.utils.formatEther(result));
         })
         .catch('error', console.error);
