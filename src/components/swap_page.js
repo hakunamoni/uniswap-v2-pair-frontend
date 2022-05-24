@@ -8,74 +8,73 @@ import SwapCurrencyInput from "./swap_currency_input";
 function SwapPage(props) {
   const currentAccount = props.currentAccount;
   const addressContract = props.addressContract;
+  const tokenAddresses = {
+    a: props.addressTokenA,
+    b: props.addressTokenB
+  };
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
   const uniswapProvider = new ethers.Contract(addressContract, abiUniswap, provider);
 
-  const tokenAddresses = {
-    a: props.addressTokenA,
-    b: props.addressTokenB
-  };
-
-  const [focusInputPos, setFocusInputPos] = useState("up");   // "up" or "do" ("down")
-  const [sourceTkIden, setSourceTkIden] = useState("a");    // "a" or "b"
-  const [targetTkIden, setTargetTkIden] = useState("b");
-  const [sourceTkBal, setSourceTkBal] = useState(undefined);
-  const [targetTkBal, setTargetTkBal] = useState(undefined);
-  const [sourceTkAmt, setSourceTkAmt] = useState(0);
-  const [targetTkAmt, setTargetTkAmt] = useState(0);
-  const [sourceTkName, setSourceTkName] = useState(undefined);
-  const [targetTkName, setTargetTkName] = useState(undefined);
-  const [sourceTkSymbol, setSourceTkSymbol] = useState(undefined);
-  const [targetTkSymbol, setTargetTkSymbol] = useState(undefined);
+  const [focusInputPos, setFocusInputPos] = useState("up");   // "up" or "down"
+  const [sourceTokenID, setSourceTokenID] = useState("a");    // "a" or "b"
+  const [targetTokenID, setTargetTokenID] = useState("b");
+  const [sourceTokenBalance, setSourceTokenBalance] = useState(undefined);
+  const [targetTokenBalance, setTargetTokenBalance] = useState(undefined);
+  const [sourceTokenAmt, setSourceTokenAmt] = useState(0);
+  const [targetTokenAmt, setTargetTokenAmt] = useState(0);
+  const [sourceTokenName, setSourceTokenName] = useState(undefined);
+  const [targetTokenName, setTargetTokenName] = useState(undefined);
+  const [sourceTokenSymbol, setSourceTokenSymbol] = useState(undefined);
+  const [targetTokenSymbol, setTargetTokenSymbol] = useState(undefined);
 
   useEffect(() => {
     console.log("useEffect(mount): initialize token normal information");
 
     if(!window.ethereum) return undefined;
 
-    const token_a = new ethers.Contract(tokenAddresses[sourceTkIden], abiTokenMini, provider);
-    const token_b = new ethers.Contract(tokenAddresses[targetTkIden], abiTokenMini, provider);
-    console.log("basic source: " + tokenAddresses[sourceTkIden]);
-    console.log("basic target: " + tokenAddresses[targetTkIden]);
+    const tokenA = new ethers.Contract(tokenAddresses[sourceTokenID], abiTokenMini, provider);
+    const tokenB = new ethers.Contract(tokenAddresses[targetTokenID], abiTokenMini, provider);
+    console.log("basic source: " + tokenAddresses[sourceTokenID]);
+    console.log("basic target: " + tokenAddresses[targetTokenID]);
 
-    token_a
+    tokenA
     .name()
     .then((result)=>{
-      setSourceTkName(result);
+      setSourceTokenName(result);
     }).catch('error', console.error);
 
-    token_a
+    tokenA
     .symbol()
     .then((result)=>{
-      setSourceTkSymbol(result);
+      setSourceTokenSymbol(result);
     }).catch('error', console.error);
 
-    token_b
+    tokenB
     .name()
     .then((result)=>{
-      setTargetTkName(result);
+      setTargetTokenName(result);
     }).catch('error', console.error);
 
-    token_b
+    tokenB
     .symbol()
     .then((result)=>{
-      setTargetTkSymbol(result);
+      setTargetTokenSymbol(result);
     }).catch('error', console.error);
 
-    token_a
+    tokenA
     .balanceOf(addressContract)
     .then((result)=>{
-      console.log("uniswapProvider token_a: ", ethers.utils.formatEther(result));
+      console.log("uniswapProvider tokenA: ", ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
 
-    token_b
+    tokenB
     .balanceOf(addressContract)
     .then((result)=>{
-      console.log("uniswapProvider token_b: ", ethers.utils.formatEther(result));
+      console.log("uniswapProvider tokenB: ", ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
   }, []);
@@ -85,32 +84,32 @@ function SwapPage(props) {
     
     if(!window.ethereum) return undefined;
     if(!currentAccount) {
-      setSourceTkBal(0);
-      setTargetTkBal(0);
+      setSourceTokenBalance(0);
+      setTargetTokenBalance(0);
       return undefined;
     }
 
     updateTokenBalances();
   },[currentAccount])
 
-  const handleSourceTkAmount = (inputAmount) => {
+  const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
 
     if(!window.ethereum) return undefined;
 
     setFocusInputPos("up");
-    calcSwapTargetAmount(sourceTkIden, inputAmount);
-    setSourceTkAmt(inputAmount);
+    calcSwapTargetAmount(sourceTokenID, inputAmount);
+    setSourceTokenAmt(inputAmount);
   };
 
-  const handleTargetTkAmount = (inputAmount) => {
+  const handleTargetTokenAmount = (inputAmount) => {
     console.log("change on target token input: calc & set SwapSourceAmount");
     
     if(!window.ethereum) return undefined;
     
-    setFocusInputPos("do");
-    calcSwapSourceAmount(targetTkIden, inputAmount);
-    setTargetTkAmt(inputAmount);
+    setFocusInputPos("down");
+    calcSwapSourceAmount(targetTokenID, inputAmount);
+    setTargetTokenAmt(inputAmount);
   };
 
   const handleDirectionClick = () => {
@@ -118,26 +117,26 @@ function SwapPage(props) {
 
     if(!window.ethereum) return undefined;
 
-    setSourceTkName(targetTkName);
-    setTargetTkName(sourceTkName);
+    setSourceTokenName(targetTokenName);
+    setTargetTokenName(sourceTokenName);
 
-    setSourceTkBal(targetTkBal);
-    setTargetTkBal(sourceTkBal);
+    setSourceTokenBalance(targetTokenBalance);
+    setTargetTokenBalance(sourceTokenBalance);
 
-    setSourceTkIden(targetTkIden);
-    setTargetTkIden(sourceTkIden);
+    setSourceTokenID(targetTokenID);
+    setTargetTokenID(sourceTokenID);
 
-    setSourceTkSymbol(targetTkSymbol);
-    setTargetTkSymbol(sourceTkSymbol);
+    setSourceTokenSymbol(targetTokenSymbol);
+    setTargetTokenSymbol(sourceTokenSymbol);
 
     if (focusInputPos == "up") {
-      setFocusInputPos("do");
-      calcSwapSourceAmount(sourceTkIden, sourceTkAmt);
-      setTargetTkAmt(sourceTkAmt);
+      setFocusInputPos("down");
+      calcSwapSourceAmount(sourceTokenID, sourceTokenAmt);
+      setTargetTokenAmt(sourceTokenAmt);
     } else {
       setFocusInputPos("up");
-      calcSwapTargetAmount(targetTkIden, targetTkAmt);
-      setSourceTkAmt(targetTkAmt);
+      calcSwapTargetAmount(targetTokenID, targetTokenAmt);
+      setSourceTokenAmt(targetTokenAmt);
     }
   };
 
@@ -145,37 +144,37 @@ function SwapPage(props) {
     console.log("click on swap button: swap tokens");
 
     uniswapSigner
-    .swap(tokenAddresses[sourceTkIden], parseEther(sourceTkAmt))
+    .swap(tokenAddresses[sourceTokenID], parseEther(sourceTokenAmt))
     .then((tr) => {
       console.log(`TransactionResponse TX hash: ${tr.hash}`)
       tr.wait().then((receipt)=>{
         console.log("transfer receipt",receipt);
 
         updateTokenBalances();
-        setSourceTkAmt(0);
-        setTargetTkAmt(0);
+        setSourceTokenAmt(0);
+        setTargetTokenAmt(0);
       });
     })
     .catch('error', console.error);
   };
 
-  async function updateTokenBalances(){
+  function updateTokenBalances(){
     console.log("function: update source,target token balances");
 
-    const token_a = new ethers.Contract(tokenAddresses[sourceTkIden], abiTokenMini, provider);
-    const token_b = new ethers.Contract(tokenAddresses[targetTkIden], abiTokenMini, provider);
+    const tokenA = new ethers.Contract(tokenAddresses[sourceTokenID], abiTokenMini, provider);
+    const tokenB = new ethers.Contract(tokenAddresses[targetTokenID], abiTokenMini, provider);
 
-    token_a
+    tokenA
     .balanceOf(currentAccount)
     .then((result)=>{
-      setSourceTkBal(ethers.utils.formatEther(result));
+      setSourceTokenBalance(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
 
-    token_b
+    tokenB
     .balanceOf(currentAccount)
     .then((result)=>{
-      setTargetTkBal(ethers.utils.formatEther(result));
+      setTargetTokenBalance(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
 
@@ -191,7 +190,7 @@ function SwapPage(props) {
       // const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
   
       // uniswapSigner
-      // .addLiquidity(tokenAddresses[sourceTkIden], parseEther("5.0"), tokenAddresses[targetTkIden], parseEther("10.0"))
+      // .addLiquidity(tokenAddresses[sourceTokenID], parseEther("5.0"), tokenAddresses[targetTokenID], parseEther("10.0"))
       // .then((tr) => {
       //     console.log(`TransactionResponse TX hash: ${tr.hash}`)
       //     tr.wait().then((receipt)=>{console.log("transfer receipt",receipt)});
@@ -200,7 +199,7 @@ function SwapPage(props) {
     // }
   }
 
-  async function calcSwapTargetAmount(tokenIdentifier, inputAmount){
+  function calcSwapTargetAmount(tokenID, inputAmount){
     console.log("function: calc & set SwapTargetAmount");
 
     // uniswapProvider
@@ -210,20 +209,20 @@ function SwapPage(props) {
     //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
     // }).catch('error', console.error);
 
-    console.log(tokenIdentifier);
+    console.log(tokenID);
     console.log(inputAmount);
     // console.log(focusInputPos);
 
     uniswapProvider
-    .getSwapTargetAmount(tokenAddresses[tokenIdentifier], parseEther(inputAmount))
+    .getSwapTargetAmount(tokenAddresses[tokenID], parseEther(inputAmount))
     .then((result)=>{
-      setTargetTkAmt(ethers.utils.formatEther(result));
+      setTargetTokenAmt(ethers.utils.formatEther(result));
       console.log(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
   }
 
-  async function calcSwapSourceAmount(tokenIdentifier, inputAmount){
+  function calcSwapSourceAmount(tokenID, inputAmount){
     console.log("function: calc & set SwapSourceAmount");
     
     // uniswapProvider
@@ -233,14 +232,14 @@ function SwapPage(props) {
     //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
     // }).catch('error', console.error);
 
-    console.log(tokenIdentifier);
+    console.log(tokenID);
     console.log(inputAmount);
     // console.log(focusInputPos);
 
     uniswapProvider
-    .getSwapSourceAmount(tokenAddresses[tokenIdentifier], parseEther(inputAmount))
+    .getSwapSourceAmount(tokenAddresses[tokenID], parseEther(inputAmount))
     .then((result)=>{
-      setSourceTkAmt(ethers.utils.formatEther(result));
+      setSourceTokenAmt(ethers.utils.formatEther(result));
       console.log(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
@@ -253,11 +252,11 @@ function SwapPage(props) {
       </h2>
       <SwapCurrencyInput
         formType = "Source"
-        tokenName={sourceTkName}
-        tokenSymbol={sourceTkSymbol}
-        tokenAmount={sourceTkAmt}
-        tokenBalance={sourceTkBal}
-        onTokenAmountChange={handleSourceTkAmount} />
+        tokenName={sourceTokenName}
+        tokenSymbol={sourceTokenSymbol}
+        tokenAmount={sourceTokenAmt}
+        tokenBalance={sourceTokenBalance}
+        onTokenAmountChange={handleSourceTokenAmount} />
       <div className='w-full flex'>
         <button
           className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
@@ -267,15 +266,15 @@ function SwapPage(props) {
       </div>
       <SwapCurrencyInput
         formType = "Target"
-        tokenName={targetTkName}
-        tokenSymbol={targetTkSymbol}
-        tokenAmount={targetTkAmt}
-        tokenBalance={targetTkBal}
-        onTokenAmountChange={handleTargetTkAmount} />
+        tokenName={targetTokenName}
+        tokenSymbol={targetTokenSymbol}
+        tokenAmount={targetTokenAmt}
+        tokenBalance={targetTokenBalance}
+        onTokenAmountChange={handleTargetTokenAmount} />
       {currentAccount
         ? <button
             className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-            disabled={sourceTkAmt === 0 || targetTkAmt === 0}
+            disabled={sourceTokenAmt === 0 || targetTokenAmt === 0}
             onClick = {handleDoSwapClick}>
             <b>Swap</b>
           </button>
