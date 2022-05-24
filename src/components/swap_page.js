@@ -73,15 +73,12 @@ function SwapPage(props) {
     
     if(!window.ethereum) return undefined;
     if(!currentAccount) {
-      setSourceTokenBalance(ethers.utils.formatEther(0));
-      setTargetTokenBalance(ethers.utils.formatEther(0));
-      setSwapPoolReserve0(ethers.utils.formatEther(0));
-      setSwapPoolReserve1(ethers.utils.formatEther(0));
+      setSourceTokenBalance(undefined);
+      setTargetTokenBalance(undefined);
       return undefined;
     }
 
     updateTokenBalances();
-    updateSwapReserves(tokenAddresses[sourceTokenID]);
   },[currentAccount])
 
   const handleSourceTokenAmount = (inputAmount) => {
@@ -153,7 +150,7 @@ function SwapPage(props) {
   };
 
   function updateSwapReserves(sourceTokenAddress){
-    console.log("function: update swap reserve values");
+    console.log("function: update swap reserve amounts");
 
     uniswapProvider
     .token0()
@@ -259,7 +256,7 @@ function SwapPage(props) {
 
       <div className='w-full flex'>
         <button
-          className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
+          className='mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
           onClick = {handleDirectionClick}>
           <b>&darr;</b>
         </button>
@@ -275,27 +272,24 @@ function SwapPage(props) {
 
       {currentAccount
         ? <button
-            className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-            disabled={sourceTokenAmt === 0 || targetTokenAmt === 0}
+            className='w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25'
+            disabled={Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0}
             onClick = {handleDoSwapClick}>
             <b>Swap</b>
           </button>
         : <></>
       }
 
-      {currentAccount
-      ? <SwapContractInfo 
-          swapContractAddress = {addrSwapContract}
-          swapContractReserve0 = {swapPoolReserve0}
-          swapContractReserve1 = {swapPoolReserve1}
-          srcTokenName = {sourceTokenName}
-          srcTokenSymbol = {sourceTokenSymbol}
-          srcTokenAddress = {tokenAddresses[sourceTokenID]}
-          tarTokenName = {targetTokenName}
-          tarTokenSymbol = {targetTokenSymbol}
-          tarTokenAddress = {tokenAddresses[targetTokenID]}/>
-      : <div className="w-96"></div>
-      }
+      <SwapContractInfo 
+        swapContractAddress = {addrSwapContract}
+        swapContractReserve0 = {swapPoolReserve0}
+        swapContractReserve1 = {swapPoolReserve1}
+        srcTokenName = {sourceTokenName}
+        srcTokenSymbol = {sourceTokenSymbol}
+        srcTokenAddress = {tokenAddresses[sourceTokenID]}
+        tarTokenName = {targetTokenName}
+        tarTokenSymbol = {targetTokenSymbol}
+        tarTokenAddress = {tokenAddresses[targetTokenID]}/>
     </div>
   )
 }
