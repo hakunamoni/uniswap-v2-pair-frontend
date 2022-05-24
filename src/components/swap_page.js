@@ -4,10 +4,11 @@ import { parseEther } from 'ethers/lib/utils';
 import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
 import SwapCurrencyInput from "./swap_currency_input";
+import SwapContractInfo from "./swap_contract_info";
 
 function SwapPage(props) {
   const currentAccount = props.currentAccount;
-  const addressContract = props.addressContract;
+  const addrSwapContract = props.addressSwapContract;
   const tokenAddresses = {
     a: props.addressTokenA,
     b: props.addressTokenB
@@ -15,30 +16,30 @@ function SwapPage(props) {
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
-  const uniswapProvider = new ethers.Contract(addressContract, abiUniswap, provider);
+  const uniswapSigner = new ethers.Contract(addrSwapContract, abiUniswap, signer);
+  const uniswapProvider = new ethers.Contract(addrSwapContract, abiUniswap, provider);
 
   const [focusInputPos, setFocusInputPos] = useState("up");   // "up" or "down"
   const [sourceTokenID, setSourceTokenID] = useState("a");    // "a" or "b"
   const [targetTokenID, setTargetTokenID] = useState("b");
   const [sourceTokenBalance, setSourceTokenBalance] = useState(undefined);
   const [targetTokenBalance, setTargetTokenBalance] = useState(undefined);
-  const [sourceTokenAmt, setSourceTokenAmt] = useState(0);
-  const [targetTokenAmt, setTargetTokenAmt] = useState(0);
+  const [sourceTokenAmt, setSourceTokenAmt] = useState(ethers.utils.formatEther(0));
+  const [targetTokenAmt, setTargetTokenAmt] = useState(ethers.utils.formatEther(0));
   const [sourceTokenName, setSourceTokenName] = useState(undefined);
   const [targetTokenName, setTargetTokenName] = useState(undefined);
   const [sourceTokenSymbol, setSourceTokenSymbol] = useState(undefined);
   const [targetTokenSymbol, setTargetTokenSymbol] = useState(undefined);
+  const [swapPoolReserve0, setSwapPoolReserve0] = useState(ethers.utils.formatEther(0));
+  const [swapPoolReserve1, setSwapPoolReserve1] = useState(ethers.utils.formatEther(0));
 
   useEffect(() => {
-    console.log("useEffect(mount): initialize token normal information");
+    console.log("useEffect(mount): initialize swap & tokens normal information");
 
     if(!window.ethereum) return undefined;
 
     const tokenA = new ethers.Contract(tokenAddresses[sourceTokenID], abiTokenMini, provider);
     const tokenB = new ethers.Contract(tokenAddresses[targetTokenID], abiTokenMini, provider);
-    console.log("basic source: " + tokenAddresses[sourceTokenID]);
-    console.log("basic target: " + tokenAddresses[targetTokenID]);
 
     tokenA
     .name()
@@ -64,19 +65,7 @@ function SwapPage(props) {
       setTargetTokenSymbol(result);
     }).catch('error', console.error);
 
-    tokenA
-    .balanceOf(addressContract)
-    .then((result)=>{
-      console.log("uniswapProvider tokenA: ", ethers.utils.formatEther(result));
-    })
-    .catch('error', console.error);
-
-    tokenB
-    .balanceOf(addressContract)
-    .then((result)=>{
-      console.log("uniswapProvider tokenB: ", ethers.utils.formatEther(result));
-    })
-    .catch('error', console.error);
+    updateSwapReserves(tokenAddresses[sourceTokenID]);
   }, []);
 
   useEffect(()=>{
@@ -84,12 +73,15 @@ function SwapPage(props) {
     
     if(!window.ethereum) return undefined;
     if(!currentAccount) {
-      setSourceTokenBalance(0);
-      setTargetTokenBalance(0);
+      setSourceTokenBalance(ethers.utils.formatEther(0));
+      setTargetTokenBalance(ethers.utils.formatEther(0));
+      setSwapPoolReserve0(ethers.utils.formatEther(0));
+      setSwapPoolReserve1(ethers.utils.formatEther(0));
       return undefined;
     }
 
     updateTokenBalances();
+    updateSwapReserves(tokenAddresses[sourceTokenID]);
   },[currentAccount])
 
   const handleSourceTokenAmount = (inputAmount) => {
@@ -98,8 +90,8 @@ function SwapPage(props) {
     if(!window.ethereum) return undefined;
 
     setFocusInputPos("up");
-    calcSwapTargetAmount(sourceTokenID, inputAmount);
     setSourceTokenAmt(inputAmount);
+    calcSwapTargetAmount(sourceTokenID, inputAmount);
   };
 
   const handleTargetTokenAmount = (inputAmount) => {
@@ -108,8 +100,8 @@ function SwapPage(props) {
     if(!window.ethereum) return undefined;
     
     setFocusInputPos("down");
-    calcSwapSourceAmount(targetTokenID, inputAmount);
     setTargetTokenAmt(inputAmount);
+    calcSwapSourceAmount(targetTokenID, inputAmount);
   };
 
   const handleDirectionClick = () => {
@@ -138,6 +130,8 @@ function SwapPage(props) {
       calcSwapTargetAmount(targetTokenID, targetTokenAmt);
       setSourceTokenAmt(targetTokenAmt);
     }
+
+    updateSwapReserves(tokenAddresses[targetTokenID]);
   };
 
   const handleDoSwapClick = () => {
@@ -151,12 +145,37 @@ function SwapPage(props) {
         console.log("transfer receipt",receipt);
 
         updateTokenBalances();
-        setSourceTokenAmt(0);
-        setTargetTokenAmt(0);
+        setSourceTokenAmt(ethers.utils.formatEther(0));
+        setTargetTokenAmt(ethers.utils.formatEther(0));
       });
     })
     .catch('error', console.error);
   };
+
+  function updateSwapReserves(sourceTokenAddress){
+    console.log("function: update swap reserve values");
+
+    uniswapProvider
+    .token0()
+    .then((result)=>{
+      const swapToken0Addr = result;
+
+      uniswapProvider
+      .getReserves()
+      .then((result)=>{
+        const swapReserve0 = swapToken0Addr === sourceTokenAddress 
+        ? ethers.utils.formatEther(result._reserve0)
+        : ethers.utils.formatEther(result._reserve1);
+  
+        const swapReserve1 = swapToken0Addr != sourceTokenAddress 
+        ? ethers.utils.formatEther(result._reserve0)
+        : ethers.utils.formatEther(result._reserve1);
+
+        setSwapPoolReserve0(swapReserve0);
+        setSwapPoolReserve1(swapReserve1);
+      }).catch('error', console.error);
+    }).catch('error', console.error);
+  }
 
   function updateTokenBalances(){
     console.log("function: update source,target token balances");
@@ -178,16 +197,9 @@ function SwapPage(props) {
     })
     .catch('error', console.error);
 
-    // uniswapProvider
-    // .getReserves()
-    // .then((result)=>{
-    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-    // }).catch('error', console.error);
-
     // if (parseInt(r0) === 0 || parseInt(r1) === 0) {
       // const signer = provider.getSigner();
-      // const uniswapSigner = new ethers.Contract(addressContract, abiUniswap, signer);
+      // const uniswapSigner = new ethers.Contract(addrSwapContract, abiUniswap, signer);
   
       // uniswapSigner
       // .addLiquidity(tokenAddresses[sourceTokenID], parseEther("5.0"), tokenAddresses[targetTokenID], parseEther("10.0"))
@@ -202,45 +214,31 @@ function SwapPage(props) {
   function calcSwapTargetAmount(tokenID, inputAmount){
     console.log("function: calc & set SwapTargetAmount");
 
-    // uniswapProvider
-    // .getReserves()
-    // .then((result)=>{
-    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-    // }).catch('error', console.error);
-
-    console.log(tokenID);
-    console.log(inputAmount);
-    // console.log(focusInputPos);
+    if (Number(inputAmount) === 0) {
+      setTargetTokenAmt(ethers.utils.formatEther(0));
+      return;
+    }
 
     uniswapProvider
     .getSwapTargetAmount(tokenAddresses[tokenID], parseEther(inputAmount))
     .then((result)=>{
       setTargetTokenAmt(ethers.utils.formatEther(result));
-      console.log(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
   }
 
   function calcSwapSourceAmount(tokenID, inputAmount){
     console.log("function: calc & set SwapSourceAmount");
-    
-    // uniswapProvider
-    // .getReserves()
-    // .then((result)=>{
-    //   console.log("reserve0: ", ethers.utils.formatEther(result._reserve0));
-    //   console.log("reserve1: ", ethers.utils.formatEther(result._reserve1));
-    // }).catch('error', console.error);
 
-    console.log(tokenID);
-    console.log(inputAmount);
-    // console.log(focusInputPos);
+    if (Number(inputAmount) === 0) {
+      setSourceTokenAmt(ethers.utils.formatEther(0));
+      return;
+    }
 
     uniswapProvider
     .getSwapSourceAmount(tokenAddresses[tokenID], parseEther(inputAmount))
     .then((result)=>{
       setSourceTokenAmt(ethers.utils.formatEther(result));
-      console.log(ethers.utils.formatEther(result));
     })
     .catch('error', console.error);
   }
@@ -250,6 +248,7 @@ function SwapPage(props) {
       <h2 className="text-center text-2xl">
         Swap
       </h2>
+
       <SwapCurrencyInput
         formType = "Source"
         tokenName={sourceTokenName}
@@ -257,6 +256,7 @@ function SwapPage(props) {
         tokenAmount={sourceTokenAmt}
         tokenBalance={sourceTokenBalance}
         onTokenAmountChange={handleSourceTokenAmount} />
+
       <div className='w-full flex'>
         <button
           className='mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]'
@@ -264,6 +264,7 @@ function SwapPage(props) {
           <b>&darr;</b>
         </button>
       </div>
+
       <SwapCurrencyInput
         formType = "Target"
         tokenName={targetTokenName}
@@ -271,6 +272,7 @@ function SwapPage(props) {
         tokenAmount={targetTokenAmt}
         tokenBalance={targetTokenBalance}
         onTokenAmountChange={handleTargetTokenAmount} />
+
       {currentAccount
         ? <button
             className='mt-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
@@ -279,6 +281,20 @@ function SwapPage(props) {
             <b>Swap</b>
           </button>
         : <></>
+      }
+
+      {currentAccount
+      ? <SwapContractInfo 
+          swapContractAddress = {addrSwapContract}
+          swapContractReserve0 = {swapPoolReserve0}
+          swapContractReserve1 = {swapPoolReserve1}
+          srcTokenName = {sourceTokenName}
+          srcTokenSymbol = {sourceTokenSymbol}
+          srcTokenAddress = {tokenAddresses[sourceTokenID]}
+          tarTokenName = {targetTokenName}
+          tarTokenSymbol = {targetTokenSymbol}
+          tarTokenAddress = {tokenAddresses[targetTokenID]}/>
+      : <div className="w-96"></div>
       }
     </div>
   )

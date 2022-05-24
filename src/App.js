@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./App.css";
+import abiUniswap from "./abi/UniswapV2MiniABI";
 import SwapPage from "./components/swap_page";
 import MetamaskAccountInfo from "./components/metamask_account_info";
 import { ethers } from "ethers";
 
-const SWAPCONTRACT_ADDR = "0x1B2E11C5BD2ED293d708721cc54ba9b462F0e86C";
-const TOKENA_ADDR = "0x5eCf1D97D196c1590b30E2D5B4e00449C797cA3b";
-const TOKENB_ADDR = "0x258B5D555a1522883Ff8E923DfdB688160f94Ac4";
+const addrSwapContract = "0x1B2E11C5BD2ED293d708721cc54ba9b462F0e86C";
 
 function App() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -16,6 +15,28 @@ function App() {
   const [chainId, setChainId] = useState(undefined);
   const [chainName, setChainName] = useState(undefined);
   const [isSwapPool, setSwapPool] = useState(true);
+  const [addrTokenA, setAddrTokenA] = useState(undefined);
+  const [addrTokenB, setAddrTokenB] = useState(undefined);
+
+  useEffect(() => {
+    console.log("useEffect(mount): set swap contract tokens addresses");
+    
+    if(!window.ethereum) return undefined;
+
+    const uniswapProvider = new ethers.Contract(addrSwapContract, abiUniswap, provider);
+
+    uniswapProvider
+    .token0()
+    .then((result)=>{
+      setAddrTokenA(result);
+    }).catch('error', console.error);
+
+    uniswapProvider
+    .token1()
+    .then((result)=>{
+      setAddrTokenB(result);
+    }).catch('error', console.error);
+  }, []);
 
   useEffect(() => {
     console.log("useEffect: set account information for currentAccount");
@@ -92,12 +113,12 @@ function App() {
       </div>
 
       <div className="p-3">
-        {isSwapPool
+        {isSwapPool && addrTokenA && addrTokenB
         ? <SwapPage
             currentAccount = {currentAccount}
-            addressContract = {SWAPCONTRACT_ADDR}
-            addressTokenA = {TOKENA_ADDR}
-            addressTokenB = {TOKENB_ADDR}/>
+            addressSwapContract = {addrSwapContract}
+            addressTokenA = {addrTokenA}
+            addressTokenB = {addrTokenB}/>
         : <button>Pool</button>
         }
       </div>
@@ -124,13 +145,6 @@ function App() {
         : <div className="w-96"></div>
         }
       </div>
-
-      {/* <div className="p-3">
-        {currentAccount
-          ? <></>
-          : <></>
-        }
-      </div> */}
     </div>
   );
 }
