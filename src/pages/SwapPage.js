@@ -3,22 +3,19 @@ import { ethers } from "ethers";
 import { parseEther } from 'ethers/lib/utils';
 import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
-import SwapCurrencyInput from "./swap_currency_input";
-import SwapContractInfo from "./swap_contract_info";
+import SwapCurrencyInput from "../components/SwapCurrencyInput";
+import SwapContractInfo from "../components/SwapContractInfo";
+import {SWAP_CONTRACT_ADDRESS} from '../constants/misc'
 
 function SwapPage(props) {
-  const currentAccount = props.currentAccount;
-  const addrSwapContract = props.addressSwapContract;
-  const tokenAddresses = {
-    a: props.addressTokenA,
-    b: props.addressTokenB
-  };
+  const {currentAccount} = props;
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const uniswapSigner = new ethers.Contract(addrSwapContract, abiUniswap, signer);
-  const uniswapProvider = new ethers.Contract(addrSwapContract, abiUniswap, provider);
+  const uniswapSigner = new ethers.Contract(SWAP_CONTRACT_ADDRESS, abiUniswap, signer);
+  const uniswapProvider = new ethers.Contract(SWAP_CONTRACT_ADDRESS, abiUniswap, provider);
 
+  const [tokenAddresses, setTokenAddresses] = useState('');
   const [focusInputPos, setFocusInputPos] = useState("up");   // "up" or "down"
   const [sourceTokenID, setSourceTokenID] = useState("a");    // "a" or "b"
   const [targetTokenID, setTargetTokenID] = useState("b");
@@ -36,41 +33,60 @@ function SwapPage(props) {
   useEffect(() => {
     console.log("useEffect(mount): initialize swap & tokens normal information");
 
+    let tmpAddressObj = {};
+
     if(!window.ethereum) return undefined;
 
-    const tokenA = new ethers.Contract(tokenAddresses[sourceTokenID], abiTokenMini, provider);
-    const tokenB = new ethers.Contract(tokenAddresses[targetTokenID], abiTokenMini, provider);
+    const uniswapProvider = new ethers.Contract(SWAP_CONTRACT_ADDRESS, abiUniswap, provider);
 
-    tokenA
-    .name()
+    uniswapProvider
+    .token0()
     .then((result)=>{
-      setSourceTokenName(result);
+      tmpAddressObj['a'] = result;
+
+      const tokenA = new ethers.Contract(result, abiTokenMini, provider);
+
+      tokenA
+      .name()
+      .then((result)=>{
+        setSourceTokenName(result);
+      }).catch('error', console.error);
+  
+      tokenA
+      .symbol()
+      .then((result)=>{
+        setSourceTokenSymbol(result);
+      }).catch('error', console.error);
+
+      updateSwapReserves(result);
     }).catch('error', console.error);
 
-    tokenA
-    .symbol()
+    uniswapProvider
+    .token1()
     .then((result)=>{
-      setSourceTokenSymbol(result);
+      tmpAddressObj['b'] = result;
+
+      const tokenB = new ethers.Contract(result, abiTokenMini, provider);
+
+      tokenB
+      .name()
+      .then((result)=>{
+        setTargetTokenName(result);
+      }).catch('error', console.error);
+  
+      tokenB
+      .symbol()
+      .then((result)=>{
+        setTargetTokenSymbol(result);
+      }).catch('error', console.error);
     }).catch('error', console.error);
 
-    tokenB
-    .name()
-    .then((result)=>{
-      setTargetTokenName(result);
-    }).catch('error', console.error);
-
-    tokenB
-    .symbol()
-    .then((result)=>{
-      setTargetTokenSymbol(result);
-    }).catch('error', console.error);
-
-    updateSwapReserves(tokenAddresses[sourceTokenID]);
+    setTokenAddresses(tmpAddressObj);
   }, []);
 
   useEffect(()=>{
     console.log("useEffect: set token balances for currentAccount");
-    
+
     if(!window.ethereum) return undefined;
     if(!currentAccount) {
       setSourceTokenBalance(undefined);
@@ -196,7 +212,7 @@ function SwapPage(props) {
 
     // if (parseInt(r0) === 0 || parseInt(r1) === 0) {
       // const signer = provider.getSigner();
-      // const uniswapSigner = new ethers.Contract(addrSwapContract, abiUniswap, signer);
+      // const uniswapSigner = new ethers.Contract(SWAP_CONTRACT_ADDRESS, abiUniswap, signer);
   
       // uniswapSigner
       // .addLiquidity(tokenAddresses[sourceTokenID], parseEther("5.0"), tokenAddresses[targetTokenID], parseEther("10.0"))
@@ -281,7 +297,7 @@ function SwapPage(props) {
       }
 
       <SwapContractInfo 
-        swapContractAddress = {addrSwapContract}
+        swapContractAddress = {SWAP_CONTRACT_ADDRESS}
         swapContractReserve0 = {swapPoolReserve0}
         swapContractReserve1 = {swapPoolReserve1}
         srcTokenName = {sourceTokenName}

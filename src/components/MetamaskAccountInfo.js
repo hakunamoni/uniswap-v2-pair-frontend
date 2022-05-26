@@ -2,9 +2,12 @@ import React from "react";
 
 function MetamaskAccountInfo(props) {
 
-  let currentAccount, ethBalance, chainId, chainName;
-  [currentAccount, ethBalance, chainId, chainName]
-    = [props.currentAccount, props.ethBalance, props.chainId, props.chainName];
+  const {
+    currentAccount,
+    ethBalance,
+    chainId,
+    chainName
+  } = props;
 
   return (
     <fieldset className="w-96 mx-auto bg-slate-100 rounded-xl">

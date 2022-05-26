@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./App.css";
 import abiUniswap from "./abi/UniswapV2MiniABI";
-import SwapPage from "./components/swap_page";
-import MetamaskAccountInfo from "./components/metamask_account_info";
+import SwapPage from "./pages/SwapPage";
+import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { ethers } from "ethers";
-
-const addrSwapContract = "0x1B2E11C5BD2ED293d708721cc54ba9b462F0e86C";
+import {SWAP_CONTRACT_ADDRESS} from './constants/misc'
 
 function App() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -15,28 +14,6 @@ function App() {
   const [chainId, setChainId] = useState(undefined);
   const [chainName, setChainName] = useState(undefined);
   const [isSwapPool, setSwapPool] = useState(true);
-  const [addrTokenA, setAddrTokenA] = useState(undefined);
-  const [addrTokenB, setAddrTokenB] = useState(undefined);
-
-  useEffect(() => {
-    console.log("useEffect(mount): set swap contract tokens addresses");
-    
-    if(!window.ethereum) return undefined;
-
-    const uniswapProvider = new ethers.Contract(addrSwapContract, abiUniswap, provider);
-
-    uniswapProvider
-    .token0()
-    .then((result)=>{
-      setAddrTokenA(result);
-    }).catch('error', console.error);
-
-    uniswapProvider
-    .token1()
-    .then((result)=>{
-      setAddrTokenB(result);
-    }).catch('error', console.error);
-  }, []);
 
   useEffect(() => {
     console.log("useEffect: set account information for currentAccount");
@@ -113,12 +90,9 @@ function App() {
       </div>
 
       <div className="p-3">
-        {isSwapPool && addrTokenA && addrTokenB
+        {isSwapPool
         ? <SwapPage
-            currentAccount = {currentAccount}
-            addressSwapContract = {addrSwapContract}
-            addressTokenA = {addrTokenA}
-            addressTokenB = {addrTokenB}/>
+            currentAccount = {currentAccount}/>
         : <button>Pool</button>
         }
       </div>

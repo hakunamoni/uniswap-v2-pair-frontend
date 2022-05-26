@@ -1,9 +1,17 @@
 import React from "react";
 
 function SwapContractInfo(props) {
-  let swapContractAddress, swapContractReserve0, swapContractReserve1, srcTokenName, srcTokenSymbol, srcTokenAddress, tarTokenName, tarTokenSymbol, tarTokenAddress;
-  [swapContractAddress, swapContractReserve0, swapContractReserve1, srcTokenName, srcTokenSymbol, srcTokenAddress, tarTokenName, tarTokenSymbol, tarTokenAddress] 
-    = [props.swapContractAddress, props.swapContractReserve0, props.swapContractReserve1, props.srcTokenName, props.srcTokenSymbol, props.srcTokenAddress, props.tarTokenName, props.tarTokenSymbol, props.tarTokenAddress];
+  const {
+    swapContractAddress,
+    swapContractReserve0,
+    swapContractReserve1,
+    srcTokenName,
+    srcTokenSymbol,
+    srcTokenAddress,
+    tarTokenName,
+    tarTokenSymbol,
+    tarTokenAddress
+  } = props;
 
   return (
     <fieldset className="overflow-auto h-32 w-96 mx-auto bg-slate-100 rounded-xl">
