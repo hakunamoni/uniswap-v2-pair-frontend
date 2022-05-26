@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
+import {BrowserRouter as Router, Routes, Route, Outlet, Link, useMatch, useResolvedPath, Navigate} from "react-router-dom";
 import "./App.css";
-import abiUniswap from "./abi/UniswapV2MiniABI";
 import SwapPage from "./pages/SwapPage";
 import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { ethers } from "ethers";
-import {SWAP_CONTRACT_ADDRESS} from './constants/misc'
 
 function App() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -13,7 +12,6 @@ function App() {
   const [currentAccount, setCurrentAccount] = useState(undefined);
   const [chainId, setChainId] = useState(undefined);
   const [chainName, setChainName] = useState(undefined);
-  const [isSwapPool, setSwapPool] = useState(true);
 
   useEffect(() => {
     console.log("useEffect: set account information for currentAccount");
@@ -35,13 +33,6 @@ function App() {
     });
   }, [currentAccount]);
 
-  const handleSwapPageClick = () => {
-    setSwapPool(true);
-  };
-  const handlePoolPageClick = () => {
-    setSwapPool(false);
-  };
-
   const handleConnectMetamask = () => {
     console.log("onClick: connect Metamask");
 
@@ -61,7 +52,6 @@ function App() {
     .catch((error) => {
       console.error('Failed to retrieve wallet accounts', error);
     });
-
   };
 
   const handleDisconnectMetamask = () => {
@@ -70,57 +60,110 @@ function App() {
     setCurrentAccount(undefined);
   };
 
-  return (
-    <div className="h-screen w-screen	m-auto bg-sky-100">
-      <h1 className="text-center text-3xl font-bold pt-8">
-        Uniswap V2 Pair (Mini) - D. S.
-      </h1>
+  function Layout() {
+    return (
+      <div className="h-screen w-screen	m-auto bg-sky-100">
+        <h1 className="text-center text-2xl font-bold py-5">
+          Uniswap V2 Pair (Mini) - D. S.
+        </h1>
+
+        <div className="w-fit mx-auto bg-white rounded-xl shadow-lg">
+          {currentAccount
+          ? <button
+              className='p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
+              onClick = {handleDisconnectMetamask}>
+              <b>Disconnect MetaMask</b>
+            </button>
+          : <button
+              className='p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
+              onClick = {handleConnectMetamask}>
+              <b>Connect MetaMask</b>
+            </button>
+          }
+          {/* {currentAccount
+          ? <MetamaskAccountInfo 
+              currentAccount = {currentAccount}
+              ethBalance = {ethBalance}
+              chainId = {chainId}
+              chainName = {chainName}/>
+          : <div className="w-96"></div>
+          } */}
+        </div>
+
+        <div className="m-5 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
+          <CustomLink to="/swap"><b>Swap</b></CustomLink>
+          <CustomLink to="/pool"><b>Pool</b></CustomLink>
+        </div>
     
-      <div className="m-5 p-2 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
-        <button
-          onClick={handleSwapPageClick}
-          className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
-          <b>Swap</b>
-        </button>
-        <button
-          onClick={handlePoolPageClick}
-          className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
-          <b>Pool</b>
-        </button>
+        <Outlet />
       </div>
+    );
+  }
 
-      <div className="p-3">
-        {isSwapPool
-        ? <SwapPage
-            currentAccount = {currentAccount}/>
-        : <button>Pool</button>
-        }
-      </div>
+  return (
+    <Router>
+    <Routes>
+      <Route path="/" element={<Layout/>}>
+        <Route index path="/" element={<Home />} />
+        <Route path="swap" element={<Swap currentAccount = {currentAccount} />} />
+        <Route path="pool" element={<Pool />} />
+        <Route path="*" element={<NoMatch />} />
+      </Route>
+    </Routes>
 
-      <div className="mt-5 p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
-        {currentAccount
-        ? <button
-            className='p-3 w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-            onClick = {handleDisconnectMetamask}>
-            <b>Disconnect MetaMask</b>
-          </button>
-        : <button
-            className='w-full p-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]'
-            onClick = {handleConnectMetamask}>
-            <b>Connect MetaMask</b>
-          </button>
-        }
-        {currentAccount
-        ? <MetamaskAccountInfo 
-            currentAccount = {currentAccount}
-            ethBalance = {ethBalance}
-            chainId = {chainId}
-            chainName = {chainName}/>
-        : <div className="w-96"></div>
-        }
-      </div>
+    </Router>
+  );
+}
+
+function CustomLink({ children, to, ...props }) {
+  let resolved = useResolvedPath(to);
+  let match = useMatch({ path: resolved.pathname, end: true });
+
+  return (
+    // <div className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
+      <Link
+        style={{ color: match ? "white" : "rgb(2 132 199)",  backgroundColor: match ? "rgb(2 132 199)" : "white"}}
+        className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[6px]"
+        to={to}
+        {...props}
+      >
+        {children}
+      </Link>
+    // </div>
+  );
+}
+
+function Home() {
+  return (
+    <Navigate to = "swap" />
+  );
+}
+
+function Swap(props) {
+  return (
+    <div>
+      <SwapPage currentAccount = {props.currentAccount}/>
     </div>
   );
 }
 
+function Pool(props) {
+  return (
+    <div>
+      {/* <PoolPage currentAccount = {props.currentAccount}/> */}
+      <h1>Pool</h1>
+    </div>
+  );
+}
+
+function NoMatch() {
+  return (
+    <div>
+      <h1>Nothing to see here!</h1>
+      <p>
+        <Link to="/">Go to the home page</Link>
+      </p>
+    </div>
+  );
+}
 export default App;
