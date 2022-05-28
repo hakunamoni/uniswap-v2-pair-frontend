@@ -6,10 +6,9 @@ import abiTokenMini from "../abi/TokenMiniABI";
 import SwapCurrencyInput from "../components/SwapCurrencyInput";
 import SwapContractInfo from "../components/SwapContractInfo";
 import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
-import { AccountContext } from "../App";
 
-function SwapPage() {
-  const { currentAccount } = useContext(AccountContext);
+function SwapPage(props) {
+  const { currentAccount } = props;
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -66,15 +65,9 @@ function SwapPage() {
       "useEffect(mount): initialize swap & tokens normal information"
     );
 
-    let tmpAddressesObj = { a: undefined, b: undefined };
-
     if (!window.ethereum) return undefined;
 
-    const uniswapProvider = new ethers.Contract(
-      SWAP_CONTRACT_ADDRESS,
-      abiUniswap,
-      provider
-    );
+    let tmpAddressesObj = { a: undefined, b: undefined };
 
     uniswapProvider
       .token0()
@@ -101,8 +94,6 @@ function SwapPage() {
             setSourceTokenSymbol(result);
           })
           .catch("error", console.error);
-
-        updateSwapReserves(result);
       })
       .catch("error", console.error);
 
@@ -134,10 +125,12 @@ function SwapPage() {
       .catch("error", console.error);
 
     setTokenAddresses(tmpAddressesObj);
+    updateSwapReserves(tmpAddressesObj["a"]);
   }, []);
 
   useEffect(() => {
     console.log("useEffect: set token balances for currentAccount");
+    console.log("currentAccount", currentAccount);
 
     if (!window.ethereum) return undefined;
     if (!currentAccount) {
@@ -192,7 +185,7 @@ function SwapPage() {
       setFocusInputPos("down");
       calcSwapSourceAmount(sourceTokenID, sourceTokenAmt);
       setTargetTokenAmt(sourceTokenAmt);
-    } else {
+    } else if (focusInputPos == "down") {
       setFocusInputPos("up");
       calcSwapTargetAmount(targetTokenID, targetTokenAmt);
       setSourceTokenAmt(targetTokenAmt);

@@ -63,7 +63,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Header />}>
             <Route index path="/" element={<Navigate to="swap" />} />
-            <Route path="swap" element={<SwapPage />} />
+            <Route
+              path="swap"
+              element={<SwapPage currentAccount={currentAccount} />}
+            />
             <Route path="pool" element={<Pool />} />
             <Route path="*" element={<NoMatch />} />
           </Route>
