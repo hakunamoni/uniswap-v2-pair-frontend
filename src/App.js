@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,35 +11,18 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
-import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { ethers } from "ethers";
 
-export const AccountContext = React.createContext(undefined);
+export const AccountContext = React.createContext({
+  currentAccount: undefined,
+  handleConnectMetamask: undefined,
+  handleDisconnectMetamask: undefined,
+});
 
 function App() {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-  const [ethBalance, setEthBalance] = useState(undefined);
   const [currentAccount, setCurrentAccount] = useState(undefined);
-  const [chainId, setChainId] = useState(undefined);
-  const [chainName, setChainName] = useState(undefined);
-
-  useEffect(() => {
-    console.log("useEffect: set account information for currentAccount");
-
-    if (!currentAccount || !ethers.utils.isAddress(currentAccount))
-      return undefined;
-    if (!window.ethereum) return undefined;
-
-    provider.getBalance(currentAccount).then((result) => {
-      setEthBalance(ethers.utils.formatEther(result));
-    });
-
-    provider.getNetwork().then((result) => {
-      setChainId(result.chainId);
-      setChainName(result.name);
-    });
-  }, [currentAccount]);
 
   const handleConnectMetamask = () => {
     console.log("onClick: connect Metamask");
@@ -53,6 +36,7 @@ function App() {
     provider
       .send("eth_requestAccounts", [])
       .then((retrievedAccounts) => {
+        console.log("retrievedAccounts", retrievedAccounts.length);
         if (retrievedAccounts.length > 0) {
           setCurrentAccount(retrievedAccounts[0]);
         }
@@ -64,82 +48,21 @@ function App() {
 
   const handleDisconnectMetamask = () => {
     console.log("onClick: disconnect Metamask");
-    setEthBalance(undefined);
     setCurrentAccount(undefined);
   };
 
-  function Layout() {
-    return (
-      <div className="h-screen w-screen	m-auto bg-sky-100">
-        <h1 className="text-center text-2xl font-bold py-5">
-          Uniswap V2 Pair (Mini) - D. S.
-        </h1>
-
-        <div className="w-fit mx-auto bg-white rounded-xl shadow-lg">
-          {currentAccount ? (
-            <button
-              className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-              onClick={handleDisconnectMetamask}
-            >
-              <b>Disconnect MetaMask</b>
-            </button>
-          ) : (
-            <button
-              className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-              onClick={handleConnectMetamask}
-            >
-              <b>Connect MetaMask</b>
-            </button>
-          )}
-          {/* {currentAccount
-          ? <MetamaskAccountInfo 
-              currentAccount = {currentAccount}
-              ethBalance = {ethBalance}
-              chainId = {chainId}
-              chainName = {chainName}/>
-          : <div className="w-96"></div>
-          } */}
-        </div>
-
-        <div className="m-5 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
-          <CustomLink to="/swap">
-            <b>Swap</b>
-          </CustomLink>
-          <CustomLink to="/pool">
-            <b>Pool</b>
-          </CustomLink>
-        </div>
-
-        <Outlet />
-      </div>
-    );
-  }
-
   return (
-    // <>
-    //   {currentAccount ? (
-    //     <button
-    //       className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-    //       onClick={handleDisconnectMetamask}
-    //     >
-    //       <b>Disconnect MetaMask</b>
-    //     </button>
-    //   ) : (
-    //     <button
-    //       className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-    //       onClick={handleConnectMetamask}
-    //     >
-    //       <b>Connect MetaMask</b>
-    //     </button>
-    //   )}
-
-    //   <SwapPage currentAccount={currentAccount} />
-    // </>
-    <AccountContext.Provider value={currentAccount}>
+    <AccountContext.Provider
+      value={{
+        currentAccount,
+        handleConnectMetamask,
+        handleDisconnectMetamask,
+      }}
+    >
       <Router>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index path="/" element={<Home />} />
+          <Route path="/" element={<Header />}>
+            <Route index path="/" element={<Navigate to="swap" />} />
             <Route path="swap" element={<SwapPage />} />
             <Route path="pool" element={<Pool />} />
             <Route path="*" element={<NoMatch />} />
@@ -147,6 +70,48 @@ function App() {
         </Routes>
       </Router>
     </AccountContext.Provider>
+  );
+}
+
+function Header() {
+  const { currentAccount, handleDisconnectMetamask, handleConnectMetamask } =
+    useContext(AccountContext);
+
+  return (
+    <div className="h-screen w-screen	m-auto bg-sky-100">
+      <h1 className="text-center text-2xl font-bold py-5">
+        Uniswap V2 Pair (Mini) - D. S.
+      </h1>
+
+      <div className="w-fit mx-auto bg-white rounded-xl shadow-lg">
+        {currentAccount ? (
+          <button
+            className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
+            onClick={handleDisconnectMetamask}
+          >
+            <b>Disconnect MetaMask</b>
+          </button>
+        ) : (
+          <button
+            className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
+            onClick={handleConnectMetamask}
+          >
+            <b>Connect MetaMask</b>
+          </button>
+        )}
+      </div>
+
+      <div className="m-5 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
+        <CustomLink to="/swap">
+          <b>Swap</b>
+        </CustomLink>
+        <CustomLink to="/pool">
+          <b>Pool</b>
+        </CustomLink>
+      </div>
+
+      <Outlet />
+    </div>
   );
 }
 
@@ -171,22 +136,10 @@ function CustomLink({ children, to, ...props }) {
   );
 }
 
-function Home() {
-  return <Navigate to="swap" />;
-}
-
-// function Swap() {
-//   return (
-//     <div>
-//       <SwapPage currentAccount={currentAccount} />
-//     </div>
-//   );
-// }
-
-function Pool(props) {
+function Pool() {
   return (
     <div>
-      {/* <PoolPage currentAccount = {props.currentAccount}/> */}
+      {/* <PoolPage /> */}
       <h1>Pool</h1>
     </div>
   );
@@ -202,4 +155,5 @@ function NoMatch() {
     </div>
   );
 }
+
 export default App;

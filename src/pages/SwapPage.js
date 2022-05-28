@@ -9,8 +9,7 @@ import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 import { AccountContext } from "../App";
 
 function SwapPage() {
-  const currentAccount = useContext(AccountContext);
-  console.log("currentAccount", currentAccount);
+  const { currentAccount } = useContext(AccountContext);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -63,144 +62,92 @@ function SwapPage() {
   );
 
   useEffect(() => {
-    const init = async () => {
-      console.log(
-        "useEffect(mount): initialize swap & tokens normal information"
-      );
+    console.log(
+      "useEffect(mount): initialize swap & tokens normal information"
+    );
 
-      let tmpAddressObj = {};
+    let tmpAddressesObj = { a: undefined, b: undefined };
 
-      if (!window.ethereum) return undefined;
+    if (!window.ethereum) return undefined;
 
-      const uniswapProvider = new ethers.Contract(
-        SWAP_CONTRACT_ADDRESS,
-        abiUniswap,
-        provider
-      );
+    const uniswapProvider = new ethers.Contract(
+      SWAP_CONTRACT_ADDRESS,
+      abiUniswap,
+      provider
+    );
 
-      const token0Address = await uniswapProvider.token0();
-      const token1Address = await uniswapProvider.token1();
+    uniswapProvider
+      .token0()
+      .then((result) => {
+        // setTokenAddresses({
+        //   ...tokenAddresses,
+        //   a: result,
+        // });
 
-      // console.log(token0Address);
-      // console.log(token1Address);
+        tmpAddressesObj["a"] = result;
 
-      setTokenAddresses({ a: token0Address, b: token1Address });
+        const tokenA = new ethers.Contract(result, abiTokenMini, provider);
 
-      const tokenA = new ethers.Contract(token0Address, abiTokenMini, provider);
+        tokenA
+          .name()
+          .then((result) => {
+            setSourceTokenName(result);
+          })
+          .catch("error", console.error);
 
-      tokenA
-        .name()
-        .then((result) => {
-          setSourceTokenName(result);
-        })
-        .catch("error", console.error);
+        tokenA
+          .symbol()
+          .then((result) => {
+            setSourceTokenSymbol(result);
+          })
+          .catch("error", console.error);
 
-      tokenA
-        .symbol()
-        .then((result) => {
-          setSourceTokenSymbol(result);
-        })
-        .catch("error", console.error);
+        updateSwapReserves(result);
+      })
+      .catch("error", console.error);
 
-      updateSwapReserves(token0Address);
+    uniswapProvider
+      .token1()
+      .then((result) => {
+        // setTokenAddresses({
+        //   ...tokenAddresses,
+        //   b: result,
+        // });
+        tmpAddressesObj["b"] = result;
 
-      const tokenB = new ethers.Contract(token1Address, abiTokenMini, provider);
+        const tokenB = new ethers.Contract(result, abiTokenMini, provider);
 
-      tokenB
-        .name()
-        .then((result) => {
-          setTargetTokenName(result);
-        })
-        .catch("error", console.error);
+        tokenB
+          .name()
+          .then((result) => {
+            setTargetTokenName(result);
+          })
+          .catch("error", console.error);
 
-      tokenB
-        .symbol()
-        .then((result) => {
-          setTargetTokenSymbol(result);
-        })
-        .catch("error", console.error);
+        tokenB
+          .symbol()
+          .then((result) => {
+            setTargetTokenSymbol(result);
+          })
+          .catch("error", console.error);
+      })
+      .catch("error", console.error);
 
-      return;
-
-      uniswapProvider
-        .token0()
-        .then((result) => {
-          tmpAddressObj["a"] = result;
-
-          // setTokenAddresses(result);
-
-          const tokenA = new ethers.Contract(result, abiTokenMini, provider);
-
-          tokenA
-            .name()
-            .then((result) => {
-              setSourceTokenName(result);
-            })
-            .catch("error", console.error);
-
-          tokenA
-            .symbol()
-            .then((result) => {
-              setSourceTokenSymbol(result);
-            })
-            .catch("error", console.error);
-
-          updateSwapReserves(result);
-        })
-        .catch("error", console.error);
-
-      uniswapProvider
-        .token1()
-        .then((result) => {
-          tmpAddressObj["b"] = result;
-          // setTokenAddresses((tokenAddresses) => [...tokenAddresses, result]);
-
-          const tokenB = new ethers.Contract(result, abiTokenMini, provider);
-
-          tokenB
-            .name()
-            .then((result) => {
-              setTargetTokenName(result);
-            })
-            .catch("error", console.error);
-
-          tokenB
-            .symbol()
-            .then((result) => {
-              setTargetTokenSymbol(result);
-            })
-            .catch("error", console.error);
-        })
-        .catch("error", console.error);
-
-      // setTokenAddresses(tmpAddressObj);
-    };
-
-    init();
+    setTokenAddresses(tmpAddressesObj);
   }, []);
 
   useEffect(() => {
-    console.log("useEffect: tokenAddresses");
-    if (tokenAddresses["a"] && tokenAddresses["b"]) {
-      updateTokenBalances();
+    console.log("useEffect: set token balances for currentAccount");
+
+    if (!window.ethereum) return undefined;
+    if (!currentAccount) {
+      setSourceTokenBalance(undefined);
+      setTargetTokenBalance(undefined);
+      return undefined;
     }
-  }, [tokenAddresses]);
-  // useEffect(() => {
-  //   // console.log("tokenAddresses", tokenAddresses);
-  //   console.log("useEffect: set token balances for currentAccount");
 
-  //   // console.log("currentAccount", currentAccount);
-
-  //   if (!window.ethereum) return undefined;
-  //   if (!currentAccount) {
-  //     setSourceTokenBalance(undefined);
-  //     setTargetTokenBalance(undefined);
-  //     return undefined;
-  //   }
-
-  //   console.log("tokenAddresses", tokenAddresses);
-  //   updateTokenBalances();
-  // }, [currentAccount]);
+    updateTokenBalances();
+  }, [currentAccount]);
 
   const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
@@ -224,7 +171,7 @@ function SwapPage() {
 
   const handleDirectionClick = () => {
     console.log(
-      "click on direction button: replace token normal info, calc & set related SwapAmount"
+      "click on direction button: replace token info, calc & set related SwapAmount"
     );
 
     if (!window.ethereum) return undefined;
@@ -273,7 +220,7 @@ function SwapPage() {
   };
 
   function updateSwapReserves(sourceTokenAddress) {
-    console.log("function: update swap reserve amounts");
+    console.log("function: get & set swap reserve amounts");
 
     uniswapProvider
       .token0()
@@ -302,9 +249,8 @@ function SwapPage() {
   }
 
   function updateTokenBalances() {
-    console.log("function: update source,target token balances");
-    console.log("tokenAddresses", tokenAddresses);
-    // return;
+    console.log("function: get & set source,target token balances");
+
     const tokenA = new ethers.Contract(
       tokenAddresses[sourceTokenID],
       abiTokenMini,
