@@ -7,37 +7,26 @@ import SwapCurrencyInput from "../components/SwapCurrencyInput";
 import SwapContractInfo from "../components/SwapContractInfo";
 import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = provider.getSigner();
+const uniswapSigner = new ethers.Contract(
+  SWAP_CONTRACT_ADDRESS,
+  abiUniswap,
+  signer
+);
+const uniswapProvider = new ethers.Contract(
+  SWAP_CONTRACT_ADDRESS,
+  abiUniswap,
+  provider
+);
+
 function SwapPage(props) {
   const { currentAccount } = props;
-
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  const uniswapSigner = new ethers.Contract(
-    SWAP_CONTRACT_ADDRESS,
-    abiUniswap,
-    signer
-  );
-  const uniswapProvider = new ethers.Contract(
-    SWAP_CONTRACT_ADDRESS,
-    abiUniswap,
-    provider
-  );
 
   const [tokenAddresses, setTokenAddresses] = useState({
     a: undefined,
     b: undefined,
   });
-  // const [data, setData] = useState({
-  //   focusInputPos: 1,
-  //   bsourceTokenID: 2,
-  //   targetTokenID: 3,
-  // });
-
-  // setData({
-  //   ...data,
-  //   focusInputPos:5
-  // })
-
   const [focusInputPos, setFocusInputPos] = useState("up"); // "up" or "down"
   const [sourceTokenID, setSourceTokenID] = useState("a"); // "a" or "b"
   const [targetTokenID, setTargetTokenID] = useState("b");
@@ -72,11 +61,6 @@ function SwapPage(props) {
     uniswapProvider
       .token0()
       .then((result) => {
-        // setTokenAddresses({
-        //   ...tokenAddresses,
-        //   a: result,
-        // });
-
         tmpAddressesObj["a"] = result;
 
         const tokenA = new ethers.Contract(result, abiTokenMini, provider);
@@ -100,10 +84,6 @@ function SwapPage(props) {
     uniswapProvider
       .token1()
       .then((result) => {
-        // setTokenAddresses({
-        //   ...tokenAddresses,
-        //   b: result,
-        // });
         tmpAddressesObj["b"] = result;
 
         const tokenB = new ethers.Contract(result, abiTokenMini, provider);
@@ -129,8 +109,17 @@ function SwapPage(props) {
   }, []);
 
   useEffect(() => {
+    console.log("useEffect: update token balances for tokenAddresses");
+
+    if (!currentAccount) return undefined;
+
+    if (tokenAddresses["a"] && tokenAddresses["b"]) {
+      updateTokenBalances();
+    }
+  }, [tokenAddresses]);
+
+  useEffect(() => {
     console.log("useEffect: set token balances for currentAccount");
-    console.log("currentAccount", currentAccount);
 
     if (!window.ethereum) return undefined;
     if (!currentAccount) {
@@ -139,7 +128,9 @@ function SwapPage(props) {
       return undefined;
     }
 
-    updateTokenBalances();
+    if (tokenAddresses["a"] && tokenAddresses["b"]) {
+      updateTokenBalances();
+    }
   }, [currentAccount]);
 
   const handleSourceTokenAmount = (inputAmount) => {
