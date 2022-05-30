@@ -194,7 +194,7 @@ function SwapPage(props) {
     const uniswapSigner = new ethers.Contract(
       SWAP_CONTRACT_ADDRESS,
       abiUniswap,
-      provider
+      signer
     );
 
     uniswapSigner
