@@ -79,6 +79,8 @@ function SwapPage(props) {
             setSourceTokenSymbol(result);
           })
           .catch("error", console.error);
+
+        updateSwapReserves(result);
       })
       .catch("error", console.error);
 
@@ -106,7 +108,6 @@ function SwapPage(props) {
       .catch("error", console.error);
 
     setTokenAddresses(tmpAddressesObj);
-    updateSwapReserves(tmpAddressesObj["a"]);
   }, []);
 
   useEffect(() => {
