@@ -7,12 +7,6 @@ import SwapCurrencyInput from "../components/SwapCurrencyInput";
 import SwapContractInfo from "../components/SwapContractInfo";
 import { SWAP_CONTRACT_ADDRESS, INFURA_PROJECT_ID } from "../constants/misc";
 
-// const provider = new ethers.providers.Web3Provider(window.ethereum);
-// const provider = new ethers.getDefaultProvider("ropsten", {
-//   infura: INFURA_PROJECT_ID,
-// });
-// console.log(provider);
-
 function SwapPage(props) {
   const { currentAccount, provider } = props;
 
@@ -52,10 +46,6 @@ function SwapPage(props) {
     console.log(
       "useEffect(mount): initialize swap & tokens normal information"
     );
-    console.log(window.ethereum);
-    console.log(provider);
-    console.log(currentAccount);
-    // if (!window.ethereum) return undefined;
 
     let tmpAddressesObj = { a: undefined, b: undefined };
 
@@ -123,7 +113,6 @@ function SwapPage(props) {
   useEffect(() => {
     console.log("useEffect: set token balances for currentAccount");
 
-    // if (!window.ethereum) return undefined;
     if (!currentAccount) {
       setSourceTokenBalance(undefined);
       setTargetTokenBalance(undefined);
@@ -138,8 +127,6 @@ function SwapPage(props) {
   const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
 
-    // if (!window.ethereum) return undefined;
-
     setFocusInputPos("up");
     setSourceTokenAmt(inputAmount);
     calcSwapTargetAmount(sourceTokenID, inputAmount);
@@ -147,8 +134,6 @@ function SwapPage(props) {
 
   const handleTargetTokenAmount = (inputAmount) => {
     console.log("change on target token input: calc & set SwapSourceAmount");
-
-    // if (!window.ethereum) return undefined;
 
     setFocusInputPos("down");
     setTargetTokenAmt(inputAmount);
@@ -159,8 +144,6 @@ function SwapPage(props) {
     console.log(
       "click on direction button: replace token info, calc & set related SwapAmount"
     );
-
-    // if (!window.ethereum) return undefined;
 
     setSourceTokenName(targetTokenName);
     setTargetTokenName(sourceTokenName);
