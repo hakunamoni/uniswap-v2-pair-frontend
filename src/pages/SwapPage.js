@@ -35,6 +35,7 @@ function SwapPage(props) {
   const [swapPoolReserve1, setSwapPoolReserve1] = useState(
     ethers.utils.formatEther(0)
   );
+  const [target2sourceRate, setTarget2sourceRate] = useState(undefined);
 
   const uniswapProvider = new ethers.Contract(
     SWAP_CONTRACT_ADDRESS,
@@ -123,6 +124,21 @@ function SwapPage(props) {
       updateTokenBalances();
     }
   }, [currentAccount]);
+
+  useEffect(() => {
+    console.log(
+      "useEffect: update target2source rate for sourceTokenAmt, targetTokenAmt"
+    );
+
+    if (Number(targetTokenAmt) == 0 || Number(sourceTokenAmt) == 0) {
+      setTarget2sourceRate(undefined);
+    } else {
+      const rate = (Number(sourceTokenAmt) / Number(targetTokenAmt)).toFixed(7);
+      // .toString();
+      setTarget2sourceRate(rate);
+      console.log("rate", rate);
+    }
+  }, [sourceTokenAmt, targetTokenAmt]);
 
   const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
@@ -344,6 +360,7 @@ function SwapPage(props) {
       )}
 
       <SwapContractInfo
+        tar2srcRate={target2sourceRate}
         swapContractAddress={SWAP_CONTRACT_ADDRESS}
         swapContractReserve0={swapPoolReserve0}
         swapContractReserve1={swapPoolReserve1}
