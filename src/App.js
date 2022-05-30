@@ -9,9 +9,10 @@ import {
   useResolvedPath,
   Navigate,
 } from "react-router-dom";
+import { ethers } from "ethers";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
-import { ethers } from "ethers";
+import { INFURA_PROJECT_ID } from "./constants/misc";
 
 export const AccountContext = React.createContext({
   currentAccount: undefined,
@@ -20,20 +21,27 @@ export const AccountContext = React.createContext({
 });
 
 function App() {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-
   const [currentAccount, setCurrentAccount] = useState(undefined);
+  const [provider, setProvider] = useState(
+    window.ethereum ? getWindowEthereumProvider() : getInfuraRopstenProvider()
+  );
 
   const handleConnectMetamask = () => {
     console.log("onClick: connect Metamask");
 
     if (!window.ethereum) {
       console.log("Please install Metamask");
+      setProvider(getInfuraRopstenProvider());
       return undefined;
     }
 
+    console.log(window.ethereum);
+    console.log(provider);
+    console.log(currentAccount);
+
+    const windowEthereumProvider = getWindowEthereumProvider();
     // MetaMask requires requesting permission to connect users accounts
-    provider
+    windowEthereumProvider
       .send("eth_requestAccounts", [])
       .then((retrievedAccounts) => {
         console.log("retrievedAccounts", retrievedAccounts.length);
@@ -44,10 +52,12 @@ function App() {
       .catch((error) => {
         console.error("Failed to retrieve wallet accounts", error);
       });
+    setProvider(windowEthereumProvider);
   };
 
   const handleDisconnectMetamask = () => {
     console.log("onClick: disconnect Metamask");
+    setProvider(getInfuraRopstenProvider());
     setCurrentAccount(undefined);
   };
 
@@ -65,7 +75,9 @@ function App() {
             <Route index path="/" element={<Navigate to="swap" />} />
             <Route
               path="swap"
-              element={<SwapPage currentAccount={currentAccount} />}
+              element={
+                <SwapPage currentAccount={currentAccount} provider={provider} />
+              }
             />
             <Route path="pool" element={<Pool />} />
             <Route path="*" element={<NoMatch />} />
@@ -157,6 +169,16 @@ function NoMatch() {
       </p>
     </div>
   );
+}
+
+function getWindowEthereumProvider() {
+  return new ethers.providers.Web3Provider(window.ethereum);
+}
+
+function getInfuraRopstenProvider() {
+  return new ethers.getDefaultProvider("ropsten", {
+    infura: INFURA_PROJECT_ID,
+  });
 }
 
 export default App;
