@@ -136,7 +136,6 @@ function SwapPage(props) {
       const rate = (Number(sourceTokenAmt) / Number(targetTokenAmt)).toFixed(7);
       // .toString();
       setTarget2sourceRate(rate);
-      console.log("rate", rate);
     }
   }, [sourceTokenAmt, targetTokenAmt]);
 
