@@ -5,7 +5,7 @@ import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
 import SwapCurrencyInput from "../components/SwapCurrencyInput";
 import SwapContractInfo from "../components/SwapContractInfo";
-import { SWAP_CONTRACT_ADDRESS, INFURA_PROJECT_ID } from "../constants/misc";
+import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 
 function SwapPage(props) {
   const { currentAccount, provider } = props;
