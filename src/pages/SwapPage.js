@@ -36,6 +36,10 @@ function SwapPage(props) {
     ethers.utils.formatEther(0)
   );
   const [target2sourceRate, setTarget2sourceRate] = useState(undefined);
+  const [tokenAllowances, setTokenAllowances] = useState({
+    a: undefined,
+    b: undefined,
+  });
 
   const uniswapProvider = new ethers.Contract(
     SWAP_CONTRACT_ADDRESS,
@@ -102,26 +106,31 @@ function SwapPage(props) {
   }, []);
 
   useEffect(() => {
-    console.log("useEffect: update token balances for tokenAddresses");
+    console.log(
+      "useEffect: update token balances,allowances for tokenAddresses"
+    );
 
     if (!currentAccount) return undefined;
 
     if (tokenAddresses["a"] && tokenAddresses["b"]) {
       updateTokenBalances();
+      updateTokenAllowances();
     }
   }, [tokenAddresses]);
 
   useEffect(() => {
-    console.log("useEffect: set token balances for currentAccount");
+    console.log("useEffect: set token balances,allowances for currentAccount");
 
     if (!currentAccount) {
       setSourceTokenBalance(undefined);
       setTargetTokenBalance(undefined);
+      setTokenAllowances({ a: undefined, b: undefined });
       return undefined;
     }
 
     if (tokenAddresses["a"] && tokenAddresses["b"]) {
       updateTokenBalances();
+      updateTokenAllowances();
     }
   }, [currentAccount]);
 
@@ -138,6 +147,12 @@ function SwapPage(props) {
       setTarget2sourceRate(rate);
     }
   }, [sourceTokenAmt, targetTokenAmt]);
+
+  useEffect(() => {
+    console.log("useEffect:  for tokenAllowances");
+
+    console.log(tokenAllowances);
+  }, [tokenAllowances]);
 
   const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
@@ -203,8 +218,30 @@ function SwapPage(props) {
           console.log("transfer receipt", receipt);
 
           updateTokenBalances();
+          updateTokenAllowances();
           setSourceTokenAmt(ethers.utils.formatEther(0));
           setTargetTokenAmt(ethers.utils.formatEther(0));
+        });
+      })
+      .catch("error", console.error);
+  };
+
+  const handleProtocolApproveClick = () => {
+    console.log("click on approve protocol button: approve 1000 ethers");
+
+    const signer = provider.getSigner();
+    const tokenASigner = new ethers.Contract(
+      tokenAddresses[sourceTokenID],
+      abiTokenMini,
+      signer
+    );
+
+    tokenASigner
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .then((tr) => {
+        console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        tr.wait().then((receipt) => {
+          console.log("transfer receipt", receipt);
         });
       })
       .catch("error", console.error);
@@ -266,19 +303,43 @@ function SwapPage(props) {
         setTargetTokenBalance(ethers.utils.formatEther(result));
       })
       .catch("error", console.error);
+  }
 
-    // if (parseInt(r0) === 0 || parseInt(r1) === 0) {
-    // const signer = provider.getSigner();
-    // const uniswapSigner = new ethers.Contract(SWAP_CONTRACT_ADDRESS, abiUniswap, signer);
+  function updateTokenAllowances() {
+    console.log("function: get & set source,target token allowances");
 
-    // uniswapSigner
-    // .addLiquidity(tokenAddresses[sourceTokenID], parseEther("5.0"), tokenAddresses[targetTokenID], parseEther("10.0"))
-    // .then((tr) => {
-    //     console.log(`TransactionResponse TX hash: ${tr.hash}`)
-    //     tr.wait().then((receipt)=>{console.log("transfer receipt",receipt)});
-    // })
-    // .catch((e)=>console.log(e));
-    // }
+    let tmpTokenAllowances = { a: undefined, b: undefined };
+
+    const tokenA = new ethers.Contract(
+      tokenAddresses[sourceTokenID],
+      abiTokenMini,
+      provider
+    );
+    const tokenB = new ethers.Contract(
+      tokenAddresses[targetTokenID],
+      abiTokenMini,
+      provider
+    );
+
+    tokenA
+      .allowance(currentAccount, SWAP_CONTRACT_ADDRESS)
+      .then((result) => {
+        tmpTokenAllowances.a = ethers.utils.formatEther(result);
+        console.log(tmpTokenAllowances);
+      })
+      .catch("error", console.error);
+
+    tokenB
+      .allowance(currentAccount, SWAP_CONTRACT_ADDRESS)
+      .then((result) => {
+        tmpTokenAllowances.b = ethers.utils.formatEther(result);
+        console.log(tmpTokenAllowances);
+      })
+      .catch("error", console.error);
+
+    console.log("tmpTokenAllowances", tmpTokenAllowances);
+
+    setTokenAllowances(tmpTokenAllowances);
   }
 
   function calcSwapTargetAmount(tokenID, inputAmount) {
@@ -344,17 +405,44 @@ function SwapPage(props) {
         onTokenAmountChange={handleTargetTokenAmount}
       />
 
+      {Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt) ? (
+        <button
+          className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+          onClick={handleProtocolApproveClick}
+        >
+          <b>Allow this protocol to use your {sourceTokenSymbol}</b>
+        </button>
+      ) : (
+        <></>
+      )}
+
+      <div className="w-96"></div>
+
       {currentAccount ? (
         Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0 ? (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>Enter an amount</b>
           </button>
+        ) : Number(sourceTokenAmt) > Number(sourceTokenBalance) ? (
+          <button
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            disabled={true}
+          >
+            <b>Insufficient {sourceTokenSymbol} balance</b>
+          </button>
+        ) : Number(targetTokenAmt) > Number(swapPoolReserve1) ? (
+          <button
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            disabled={true}
+          >
+            <b>Insufficient Reserve {targetTokenSymbol} balance</b>
+          </button>
         ) : (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             onClick={handleDoSwapClick}
           >
             <b>Swap</b>
@@ -362,7 +450,7 @@ function SwapPage(props) {
         )
       ) : (
         <button
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
+          className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
           disabled={true}
         >
           <b>Please connect MetaMask first</b>
