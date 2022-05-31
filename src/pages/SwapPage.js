@@ -148,11 +148,11 @@ function SwapPage(props) {
     }
   }, [sourceTokenAmt, targetTokenAmt]);
 
-  useEffect(() => {
-    console.log("useEffect:  for tokenAllowances");
+  // useEffect(() => {
+  //   console.log("useEffect:  for tokenAllowances");
 
-    console.log(tokenAllowances);
-  }, [tokenAllowances]);
+  //   console.log(tokenAllowances);
+  // }, [tokenAllowances]);
 
   const handleSourceTokenAmount = (inputAmount) => {
     console.log("change on source token input: calc & set SwapTargetAmount");
@@ -325,7 +325,6 @@ function SwapPage(props) {
       .allowance(currentAccount, SWAP_CONTRACT_ADDRESS)
       .then((result) => {
         tmpTokenAllowances.a = ethers.utils.formatEther(result);
-        console.log(tmpTokenAllowances);
       })
       .catch("error", console.error);
 
@@ -333,11 +332,8 @@ function SwapPage(props) {
       .allowance(currentAccount, SWAP_CONTRACT_ADDRESS)
       .then((result) => {
         tmpTokenAllowances.b = ethers.utils.formatEther(result);
-        console.log(tmpTokenAllowances);
       })
       .catch("error", console.error);
-
-    console.log("tmpTokenAllowances", tmpTokenAllowances);
 
     setTokenAllowances(tmpTokenAllowances);
   }
@@ -406,17 +402,17 @@ function SwapPage(props) {
       />
 
       {Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt) ? (
-        <button
-          className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-          onClick={handleProtocolApproveClick}
-        >
-          <b>Allow this protocol to use your {sourceTokenSymbol}</b>
-        </button>
+        <div className="w-96">
+          <button
+            className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveClick}
+          >
+            <b>Allow this protocol to use your {sourceTokenSymbol}</b>
+          </button>
+        </div>
       ) : (
         <></>
       )}
-
-      <div className="w-96"></div>
 
       {currentAccount ? (
         Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0 ? (
@@ -443,6 +439,9 @@ function SwapPage(props) {
         ) : (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            disabled={
+              Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt)
+            }
             onClick={handleDoSwapClick}
           >
             <b>Swap</b>
