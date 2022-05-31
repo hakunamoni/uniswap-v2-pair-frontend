@@ -12,6 +12,7 @@ import {
 import { ethers } from "ethers";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
+import PoolPage from "./pages/PoolPage";
 import { INFURA_PROJECT_ID } from "./constants/misc";
 
 export const AccountContext = React.createContext({
@@ -83,7 +84,16 @@ function App() {
                 />
               }
             />
-            <Route path="pool" element={<Pool />} />
+            <Route
+              path="pool"
+              element={
+                <PoolPage
+                  currentAccount={currentAccount}
+                  provider={provider}
+                  connectMetamask={handleConnectMetamask}
+                />
+              }
+            />
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>
@@ -152,15 +162,6 @@ function CustomLink({ children, to, ...props }) {
       {children}
     </Link>
     // </div>
-  );
-}
-
-function Pool() {
-  return (
-    <div>
-      {/* <PoolPage /> */}
-      <h1>Pool</h1>
-    </div>
   );
 }
 
