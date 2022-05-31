@@ -76,7 +76,11 @@ function App() {
             <Route
               path="swap"
               element={
-                <SwapPage currentAccount={currentAccount} provider={provider} />
+                <SwapPage
+                  currentAccount={currentAccount}
+                  provider={provider}
+                  connectMetamask={handleConnectMetamask}
+                />
               }
             />
             <Route path="pool" element={<Pool />} />

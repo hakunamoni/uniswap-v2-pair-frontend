@@ -8,7 +8,7 @@ import SwapContractInfo from "../components/SwapContractInfo";
 import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 
 function SwapPage(props) {
-  const { currentAccount, provider } = props;
+  const { currentAccount, provider, connectMetamask } = props;
 
   const [tokenAddresses, setTokenAddresses] = useState({
     a: undefined,
@@ -450,9 +450,9 @@ function SwapPage(props) {
       ) : (
         <button
           className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-          disabled={true}
+          onClick={connectMetamask}
         >
-          <b>Please connect MetaMask first</b>
+          <b>Connect MetaMask</b>
         </button>
       )}
 
