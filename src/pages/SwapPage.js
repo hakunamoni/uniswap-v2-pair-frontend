@@ -345,17 +345,28 @@ function SwapPage(props) {
       />
 
       {currentAccount ? (
+        Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0 ? (
+          <button
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
+            disabled={true}
+          >
+            <b>Enter an amount</b>
+          </button>
+        ) : (
+          <button
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
+            onClick={handleDoSwapClick}
+          >
+            <b>Swap</b>
+          </button>
+        )
+      ) : (
         <button
           className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-25"
-          disabled={
-            Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0
-          }
-          onClick={handleDoSwapClick}
+          disabled={true}
         >
-          <b>Swap</b>
+          <b>Please connect MetaMask first</b>
         </button>
-      ) : (
-        <></>
       )}
 
       <SwapContractInfo
