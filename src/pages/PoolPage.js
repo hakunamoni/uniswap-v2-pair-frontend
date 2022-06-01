@@ -7,25 +7,25 @@ import PoolCurrencyInput from "../components/PoolCurrencyInput";
 import PoolContractInfo from "../components/PoolContractInfo";
 import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 
-function usePoolReserves() {
-  console.log("function: get uniswap pool reserves");
+// function usePoolReserves() {
+//   console.log("function: get uniswap pool reserves");
 
-  const [poolReserve, setPoolReserve] = useState({
-    a: ethers.utils.formatEther(0),
-    b: ethers.utils.formatEther(0),
-  });
+//   const [poolReserve, setPoolReserve] = useState({
+//     a: ethers.utils.formatEther(0),
+//     b: ethers.utils.formatEther(0),
+//   });
 
-  uniswapProvider
-    .getReserves()
-    .then((result) => {
-      console.log(result);
-      tmpReserveObj = { a: result._reserve0, b: result._reserve1 };
-      setPoolReserve(tmpReserveObj);
-    })
-    .catch("error", console.error);
+//   uniswapProvider
+//     .getReserves()
+//     .then((result) => {
+//       console.log(result);
+//       tmpReserveObj = { a: result._reserve0, b: result._reserve1 };
+//       setPoolReserve(tmpReserveObj);
+//     })
+//     .catch("error", console.error);
 
-  return poolReserve;
-}
+//   return poolReserve;
+// }
 
 function PoolPage(props) {
   const { currentAccount, provider, connectMetamask } = props;
@@ -46,7 +46,10 @@ function PoolPage(props) {
     a: undefined,
     b: undefined,
   });
-  const [poolReserve, setPoolReserve] = usePoolReserves();
+  const [poolReserve, setPoolReserve] = useState({
+    a: undefined,
+    b: undefined,
+  });
   const [addLiquidityRate, setAddLiquidityRate] = useState({
     targetPerSource: undefined, // poolReserve.b / poolReserve.a
     sourcePerTarget: undefined, // poolReserve.a / poolReserve.b
@@ -343,6 +346,24 @@ function PoolPage(props) {
       Number(tmpLiquidityAdd) /
       (Number(tmpLiquidityAdd) + Number(tmpLiquidityTotalSupply))
     );
+  }
+
+  function getPoolReserves() {
+    console.log("function: get uniswap pool reserves");
+
+    let tmpReserveObj;
+
+    uniswapProvider
+      .getReserves()
+      .then((result) => {
+        console.log(result);
+        tmpReserveObj = { a: result._reserve0, b: result._reserve1 };
+        // setPoolReserve(tmpReserveObj);
+      })
+      .catch("error", console.error);
+
+    return tmpReserveObj;
+    // return poolReserve;
   }
 
   function getTokenBalances() {
