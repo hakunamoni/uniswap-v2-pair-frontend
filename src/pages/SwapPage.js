@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useContext } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import abiUniswap from "../abi/UniswapV2MiniABI";
@@ -47,6 +47,37 @@ function SwapPage(props) {
     provider
   );
 
+  // get token addrs
+  useEffect(() => {
+    uniswapProvider
+      .token0()
+      .then((result) => setTokenAddresses((s) => ({ ...s, a: result })));
+    uniswapProvider
+      .token1()
+      .then((result) => setTokenAddresses((s) => ({ ...s, b: result })));
+  }, []);
+
+  // get token infor
+  useEffect(() => {
+    if (tokenAddresses.a && tokenAddresses.b) {
+      const tokenA = new ethers.Contract(result, abiTokenMini, provider);
+      console.log(tokenA.name());
+      tokenA
+        .name()
+        .then((result) => {
+          setSourceTokenName(result);
+        })
+        .catch("error", console.error);
+
+      tokenA
+        .symbol()
+        .then((result) => {
+          setSourceTokenSymbol(result);
+        })
+        .catch("error", console.error);
+    }
+  }, [tokenAddresses]);
+
   useEffect(() => {
     console.log(
       "useEffect(mount): initialize swap & tokens normal information"
@@ -60,7 +91,7 @@ function SwapPage(props) {
         tmpAddressesObj["a"] = result;
 
         const tokenA = new ethers.Contract(result, abiTokenMini, provider);
-
+        console.log(tokenA.name());
         tokenA
           .name()
           .then((result) => {
