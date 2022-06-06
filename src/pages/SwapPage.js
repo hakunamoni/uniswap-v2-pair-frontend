@@ -68,7 +68,7 @@ function SwapPage(props) {
 
       setTokenInfo({
         a: { name: name0, symbol: symbol0, address: addr0 },
-        b: { name: name1, symbol: symbol1, address: addr0 },
+        b: { name: name1, symbol: symbol1, address: addr1 },
       });
 
       setTokens({ a: tokenA, b: tokenB });
@@ -137,6 +137,11 @@ function SwapPage(props) {
           a: ethers.utils.formatEther(allow0),
           b: ethers.utils.formatEther(allow1),
         });
+        console.log(
+          "allow0, allow1",
+          ethers.utils.formatEther(allow0),
+          ethers.utils.formatEther(allow1)
+        );
       } else {
         setTokenAllowances({ a: undefined, b: undefined });
       }
