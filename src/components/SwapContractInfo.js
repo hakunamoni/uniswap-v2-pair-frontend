@@ -15,7 +15,7 @@ function SwapContractInfo(props) {
   } = props;
 
   return (
-    <fieldset className="overflow-auto h-32 w-96 mx-auto bg-slate-100 rounded-xl">
+    <fieldset className="overflow-auto h-48 w-96 mx-auto bg-slate-100 rounded-xl">
       {tar2srcRate ? (
         <p className="p-1 text-slate-500">
           <b>
@@ -34,9 +34,13 @@ function SwapContractInfo(props) {
         Address: <span className="text-sm">{swapContractAddress}</span>
       </p>
       <p className="p-1 text-slate-500">
-        Reserves: {"["}
-        {swapContractReserve0}, {swapContractReserve1}
-        {"]"}
+        Reserves: <br />
+        <span className="text-sm">
+          {" "}
+          {"["}
+          {swapContractReserve0}, {swapContractReserve1}
+          {"]"}
+        </span>
       </p>
 
       <p className="pt-2 p-1">
