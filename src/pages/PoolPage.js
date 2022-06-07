@@ -33,6 +33,7 @@ function PoolPage(props) {
   const [liquidityBalance, setLiquidityBalance] = useState(undefined);
   const [liquidityNewEstimate, setLiquidityNewEstimate] = useState(undefined);
   const [isProvideClick, setIsProvideClick] = useState(false);
+  const [isApproveClick, setIsApproveClick] = useState(false);
 
   const addLiquidityRate =
     poolReserve.a &&
@@ -177,67 +178,45 @@ function PoolPage(props) {
     fetchData();
   }, [currentAccount, tokens, isProvideClick]);
 
-  // reset source/target token amount as 0
+  // reset A/B token amount as 0
   useEffect(() => {
-    console.log("useEffect: set source,target TokenAmt for Provide Click");
+    console.log("useEffect: set A,B TokenAmt for Provide Click");
     setATokenInputAmt(undefined);
     setBTokenInputAmt(undefined);
   }, [isProvideClick]);
 
-  const handleSourceTokenAmount = (inputAmount) => {
-    console.log(
-      "change on source token input: calc target & set token amounts"
-    );
+  const handleATokenAmount = (inputAmount) => {
+    console.log("change on A token input: calc B & new estimate amounts");
 
-    const tmpATokenInputAmt = inputAmount;
     const tmpBTokenInputAmt = isLiquidityEmpty
       ? bTokenInputAmt
-      : Number(tmpATokenInputAmt) * Number(addLiquidityRate.bPerARate);
-    // : calcbTokenInputAmt(tmpATokenInputAmt);
+      : Number(inputAmount) * Number(addLiquidityRate.bPerARate);
     const tmpliquidityNewEstimate = isLiquidityEmpty
-      ? calcAddLiquidityTokenZero(tmpATokenInputAmt, tmpBTokenInputAmt)
-      : calcAddLiquidityTokenExist(
-          tmpATokenInputAmt,
-          poolReserve.a,
-          liquidityTotal
-        );
+      ? calcAddLiquidityTokenZero(inputAmount, tmpBTokenInputAmt)
+      : calcAddLiquidityTokenExist(inputAmount, poolReserve.a, liquidityTotal);
 
-    setATokenInputAmt(tmpATokenInputAmt);
+    setATokenInputAmt(inputAmount);
     setBTokenInputAmt(tmpBTokenInputAmt);
     setLiquidityNewEstimate(tmpliquidityNewEstimate);
   };
 
-  const handleTargetTokenAmount = (inputAmount) => {
-    console.log(
-      "change on target token input: calc source & set token amounts"
-    );
+  const handleBTokenAmount = (inputAmount) => {
+    console.log("change on B token input: calc A & new estimate amounts");
 
-    const tmpBTokenInputAmt = inputAmount;
     const tmpATokenInputAmt = isLiquidityEmpty
       ? aTokenInputAmt
-      : Number(tmpBTokenInputAmt) * Number(addLiquidityRate.aPerBRate);
-    // : calcaTokenInputAmt(tmpBTokenInputAmt);
+      : Number(inputAmount) * Number(addLiquidityRate.aPerBRate);
     const tmpliquidityNewEstimate = isLiquidityEmpty
-      ? calcAddLiquidityTokenZero(tmpATokenInputAmt, tmpBTokenInputAmt)
-      : calcAddLiquidityTokenExist(
-          tmpBTokenInputAmt,
-          poolReserve.b,
-          liquidityTotal
-        );
+      ? calcAddLiquidityTokenZero(tmpATokenInputAmt, inputAmount)
+      : calcAddLiquidityTokenExist(inputAmount, poolReserve.b, liquidityTotal);
 
     setATokenInputAmt(tmpATokenInputAmt);
-    setBTokenInputAmt(tmpBTokenInputAmt);
+    setBTokenInputAmt(inputAmount);
     setLiquidityNewEstimate(tmpliquidityNewEstimate);
   };
 
   const handleDoProvideClick = () => {
     console.log("click on provide button: add liquidity");
-
-    // if (isLiquidityEmpty) {
-    //   // first time to add tokens to liquidity
-    // } else {
-    //   // add tokens to existing liquidity
-    // }
 
     const signer = provider.getSigner();
     const uniswapSigner = new ethers.Contract(
@@ -249,9 +228,9 @@ function PoolPage(props) {
     uniswapSigner
       .addLiquidity(
         tokenInfo.a.address,
-        parseEther(aTokenInputAmt),
+        parseEther(aTokenInputAmt.toString()),
         tokenInfo.b.address,
-        parseEther(bTokenInputAmt)
+        parseEther(bTokenInputAmt.toString())
       )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
@@ -264,18 +243,58 @@ function PoolPage(props) {
       .catch((e) => console.log(e));
   };
 
-  // function calcbTokenInputAmt(tmpATokenInputAmt) {
-  //   return (Number(poolReserve.b) * tmpATokenInputAmt) / Number(poolReserve.a);
-  // }
+  const handleProtocolApproveAClick = () => {
+    console.log("click on approve A protocol button: approve 1000 ethers");
 
-  // function calcaTokenInputAmt(tmpBTokenInputAmt) {
-  //   return (Number(poolReserve.a) * tmpBTokenInputAmt) / Number(poolReserve.b);
-  // }
+    const signer = provider.getSigner();
+    const tokenASigner = new ethers.Contract(
+      tokenInfo.a.address,
+      abiTokenMini,
+      signer
+    );
 
+    tokenASigner
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .then((tr) => {
+        console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        tr.wait().then((receipt) => {
+          console.log("transfer receipt", receipt);
+
+          setIsApproveClick(!isApproveClick);
+        });
+      })
+      .catch("error", console.error);
+  };
+
+  const handleProtocolApproveBClick = () => {
+    console.log("click on approve B protocol button: approve 1000 ethers");
+
+    const signer = provider.getSigner();
+    const tokenBSigner = new ethers.Contract(
+      tokenInfo.b.address,
+      abiTokenMini,
+      signer
+    );
+
+    tokenBSigner
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .then((tr) => {
+        console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        tr.wait().then((receipt) => {
+          console.log("transfer receipt", receipt);
+
+          setIsApproveClick(!isApproveClick);
+        });
+      })
+      .catch("error", console.error);
+  };
+
+  // get liquidity amount for empty pool
   function calcAddLiquidityTokenZero(tmpAddTokenAmountA, tmpAddTokenAmountB) {
     return Math.sqrt(Number(tmpAddTokenAmountA) * Number(tmpAddTokenAmountB));
   }
 
+  // get liquidity amount for existing pool
   function calcAddLiquidityTokenExist(addTokenAmt, tokenReserve, totalSupply) {
     return (Number(totalSupply) * Number(addTokenAmt)) / Number(tokenReserve);
   }
@@ -289,7 +308,7 @@ function PoolPage(props) {
         tokenSymbol={tokenInfo.a.symbol}
         tokenAmount={aTokenInputAmt}
         tokenBalance={tokenBalances.a}
-        onTokenAmountChange={handleSourceTokenAmount}
+        onTokenAmountChange={handleATokenAmount}
       />
 
       <div className="w-full flex">
@@ -301,53 +320,92 @@ function PoolPage(props) {
         tokenSymbol={tokenInfo.b.symbol}
         tokenAmount={bTokenInputAmt}
         tokenBalance={tokenBalances.b}
-        onTokenAmountChange={handleTargetTokenAmount}
+        onTokenAmountChange={handleBTokenAmount}
       />
 
-      {/* {Number(tokenAllowances[sourceTokenID]) < Number(aTokenInputAmt) ? (
+      {Number(tokenAllowances.a) < Number(aTokenInputAmt) &&
+      Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
+        <div className="w-96">
+          <button
+            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveAClick}
+          >
+            <b>Approve {tokenInfo.a.symbol}</b>
+          </button>
+          <button
+            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveBClick}
+          >
+            <b>Approve {tokenInfo.b.symbol}</b>
+          </button>
+        </div>
+      ) : Number(tokenAllowances.a) < Number(aTokenInputAmt) ? (
         <div className="w-96">
           <button
             className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveClick}
+            onClick={handleProtocolApproveAClick}
           >
-            <b>Allow this protocol to use your {sourceTokenSymbol}</b>
+            <b>Allow this protocol to use your {tokenInfo.a.symbol}</b>
+          </button>
+        </div>
+      ) : Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
+        <div className="w-96">
+          <button
+            className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveBClick}
+          >
+            <b>Allow this protocol to use your {tokenInfo.b.symbol}</b>
           </button>
         </div>
       ) : (
         <></>
-      )} */}
+      )}
 
-      {/* {currentAccount ? (
-        Number(aTokenInputAmt) === 0 || Number(bTokenInputAmt) === 0 ? (
+      {currentAccount ? (
+        !aTokenInputAmt ||
+        !bTokenInputAmt ||
+        Number(aTokenInputAmt) === 0 ||
+        Number(bTokenInputAmt) === 0 ? (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>Enter an amount</b>
           </button>
-        ) : Number(aTokenInputAmt) > Number(sourceTokenBalance) ? (
+        ) : Number(aTokenInputAmt) > Number(tokenBalances.a) &&
+          Number(bTokenInputAmt) > Number(tokenBalances.b) ? (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
-            <b>Insufficient {sourceTokenSymbol} balance</b>
+            <b>
+              Insufficient {tokenInfo.a.symbol},{tokenInfo.b.symbol} balances
+            </b>
           </button>
-        ) : Number(bTokenInputAmt) > Number(swapPoolReserve1) ? (
+        ) : Number(aTokenInputAmt) > Number(tokenBalances.a) ? (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
-            <b>Insufficient Reserve {targetTokenSymbol} balance</b>
+            <b>Insufficient {tokenInfo.a.symbol} balance</b>
+          </button>
+        ) : Number(bTokenInputAmt) > Number(tokenBalances.b) ? (
+          <button
+            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            disabled={true}
+          >
+            <b>Insufficient {tokenInfo.b.symbol} balance</b>
           </button>
         ) : (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={
-              Number(tokenAllowances[sourceTokenID]) < Number(aTokenInputAmt)
+              Number(tokenAllowances.a) < Number(aTokenInputAmt) ||
+              Number(tokenAllowances.b) < Number(bTokenInputAmt)
             }
-            onClick={handleDoSwapClick}
+            onClick={handleDoProvideClick}
           >
-            <b>Swap</b>
+            <b>Supply</b>
           </button>
         )
       ) : (
@@ -357,7 +415,7 @@ function PoolPage(props) {
         >
           <b>Connect MetaMask</b>
         </button>
-      )} */}
+      )}
 
       <PoolContractInfo
         swapContractAddress={SWAP_CONTRACT_ADDRESS}

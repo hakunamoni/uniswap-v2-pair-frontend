@@ -34,7 +34,8 @@ function SwapPage(props) {
   const [targetTokenAmt, setTargetTokenAmt] = useState(undefined);
   const [isDirectionClick, setIsDirectionClick] = useState(true);
   const [isDoSwapClick, setIsDoSwapClick] = useState(false);
-  // const [isApproveClick, setIsApproveClick] = useState(false);
+  const [isApproveClick, setIsApproveClick] = useState(false);
+
   const target2sourceRate =
     targetTokenAmt &&
     sourceTokenAmt &&
@@ -157,7 +158,7 @@ function SwapPage(props) {
         uniswapProvider
           .getSwapTargetAmount(
             tokenInfo[sourceTokenID].address,
-            parseEther(sourceTokenAmt)
+            parseEther(sourceTokenAmt.toString())
           )
           .then((result) => {
             setTargetTokenAmt(ethers.utils.formatEther(result));
@@ -179,7 +180,7 @@ function SwapPage(props) {
           uniswapProvider
             .getSwapSourceAmount(
               tokenInfo[targetTokenID].address,
-              parseEther(targetTokenAmt)
+              parseEther(targetTokenAmt.toString())
             )
             .then((result) => {
               setSourceTokenAmt(ethers.utils.formatEther(result));
@@ -242,7 +243,10 @@ function SwapPage(props) {
     );
 
     uniswapSigner
-      .swap(tokenInfo[sourceTokenID].address, parseEther(sourceTokenAmt))
+      .swap(
+        tokenInfo[sourceTokenID].address,
+        parseEther(sourceTokenAmt.toString())
+      )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
         tr.wait().then((receipt) => {
@@ -270,6 +274,8 @@ function SwapPage(props) {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
+
+          setIsApproveClick(!isApproveClick);
         });
       })
       .catch("error", console.error);
@@ -324,7 +330,10 @@ function SwapPage(props) {
           <b>Insufficient Reserve {tokenInfo[targetTokenID].symbol} balance</b>
         </button>
       ) : currentAccount ? (
-        Number(sourceTokenAmt) === 0 || Number(targetTokenAmt) === 0 ? (
+        !sourceTokenAmt ||
+        !targetTokenAmt ||
+        Number(sourceTokenAmt) === 0 ||
+        Number(targetTokenAmt) === 0 ? (
           <button
             className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
