@@ -1,7 +1,7 @@
 import React from "react";
 
 function SwapCurrencyInput(props) {
-  const { formType, tokenAmount, tokenBalance, tokenName, tokenSymbol } = props;
+  const { formType, tokenAmount, tokenBalance, tokenSymbol } = props;
 
   function handleTokenInputChange(e) {
     console.log("handle on token input: pass input value");

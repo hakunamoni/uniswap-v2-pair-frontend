@@ -59,9 +59,12 @@ function PoolContractInfo(props) {
         Address: <span className="text-sm">{swapContractAddress}</span>
       </p>
       <p className="p-1 text-slate-500">
-        Reserves: {"["}
-        {poolReserve.a}, {poolReserve.b}
-        {"]"}
+        Reserves: <br />
+        <span className="text-sm">
+          {"["}
+          {poolReserve.a}, {poolReserve.b}
+          {"]"}
+        </span>
       </p>
       <p className="p-1 text-slate-500">Total supply: {totalSupply}</p>
       {liquidityBalance ? (

@@ -12,6 +12,7 @@ function SwapPage(props) {
 
   const [focusInputPos, setFocusInputPos] = useState(true); // true: "up", false: "down"
   const [sourceTokenID, setSourceTokenID] = useState("b"); // "a" or "b"
+  const targetTokenID = sourceTokenID === "a" ? "b" : "a";
   const [tokens, setTokens] = useState({ a: undefined, b: undefined });
   const [tokenInfo, setTokenInfo] = useState({
     a: { name: undefined, symbol: undefined, address: undefined },
@@ -26,16 +27,14 @@ function SwapPage(props) {
     b: undefined,
   });
   const [poolReserve, setPoolReserve] = useState({
-    a: ethers.utils.formatEther(0),
-    b: ethers.utils.formatEther(0),
+    a: undefined,
+    b: undefined,
   });
   const [sourceTokenAmt, setSourceTokenAmt] = useState(undefined);
   const [targetTokenAmt, setTargetTokenAmt] = useState(undefined);
   const [isDirectionClick, setIsDirectionClick] = useState(true);
   const [isDoSwapClick, setIsDoSwapClick] = useState(false);
   // const [isApproveClick, setIsApproveClick] = useState(false);
-
-  const targetTokenID = sourceTokenID === "a" ? "b" : "a";
   const target2sourceRate =
     targetTokenAmt &&
     sourceTokenAmt &&
@@ -79,8 +78,6 @@ function SwapPage(props) {
       });
 
       setTokens({ a: tokenA, b: tokenB });
-
-      console.log("tokeninfo", addr0, addr1, name0, symbol0, name1, symbol1);
     }
     fetchData();
   }, []);
@@ -144,11 +141,6 @@ function SwapPage(props) {
           a: ethers.utils.formatEther(allow0),
           b: ethers.utils.formatEther(allow1),
         });
-        console.log(
-          "allow0, allow1",
-          ethers.utils.formatEther(allow0),
-          ethers.utils.formatEther(allow1)
-        );
       } else {
         setTokenAllowances({ a: undefined, b: undefined });
       }
@@ -288,7 +280,6 @@ function SwapPage(props) {
       <h2 className="text-center text-2xl">Swap</h2>
       <SwapCurrencyInput
         formType="Source"
-        tokenName={tokenInfo[sourceTokenID].name}
         tokenSymbol={tokenInfo[sourceTokenID].symbol}
         tokenAmount={sourceTokenAmt}
         tokenBalance={tokenBalances[sourceTokenID]}
@@ -304,7 +295,6 @@ function SwapPage(props) {
       </div>
       <SwapCurrencyInput
         formType="Target"
-        tokenName={tokenInfo[targetTokenID].name}
         tokenSymbol={tokenInfo[targetTokenID].symbol}
         tokenAmount={targetTokenAmt}
         tokenBalance={tokenBalances[targetTokenID]}
@@ -371,14 +361,10 @@ function SwapPage(props) {
       <SwapContractInfo
         tar2srcRate={target2sourceRate}
         swapContractAddress={SWAP_CONTRACT_ADDRESS}
-        swapContractReserve0={poolReserve[sourceTokenID]}
-        swapContractReserve1={poolReserve[targetTokenID]}
-        srcTokenName={tokenInfo[sourceTokenID].name}
-        srcTokenSymbol={tokenInfo[sourceTokenID].symbol}
-        srcTokenAddress={tokenInfo[sourceTokenID].address}
-        tarTokenName={tokenInfo[targetTokenID].name}
-        tarTokenSymbol={tokenInfo[targetTokenID].symbol}
-        tarTokenAddress={tokenInfo[targetTokenID].address}
+        poolReserve={poolReserve}
+        tokenInfo={tokenInfo}
+        srcTokenID={sourceTokenID}
+        tarTokenID={targetTokenID}
       />
     </div>
   );

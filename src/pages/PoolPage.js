@@ -91,8 +91,6 @@ function PoolPage(props) {
       });
 
       setTokens({ a: tokenA, b: tokenB });
-
-      console.log("tokeninfo", addr0, addr1, name0, symbol0, name1, symbol1);
     }
     fetchData();
   }, []);

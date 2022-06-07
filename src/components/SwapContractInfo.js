@@ -4,14 +4,10 @@ function SwapContractInfo(props) {
   const {
     tar2srcRate,
     swapContractAddress,
-    swapContractReserve0,
-    swapContractReserve1,
-    srcTokenName,
-    srcTokenSymbol,
-    srcTokenAddress,
-    tarTokenName,
-    tarTokenSymbol,
-    tarTokenAddress,
+    poolReserve,
+    tokenInfo,
+    srcTokenID,
+    tarTokenID,
   } = props;
 
   return (
@@ -19,7 +15,8 @@ function SwapContractInfo(props) {
       {tar2srcRate ? (
         <p className="p-1 text-slate-500">
           <b>
-            1 {tarTokenSymbol} = {tar2srcRate} {srcTokenSymbol}
+            1 {tokenInfo[tarTokenID].symbol} = {tar2srcRate}{" "}
+            {tokenInfo[srcTokenID].symbol}
           </b>
         </p>
       ) : (
@@ -38,7 +35,7 @@ function SwapContractInfo(props) {
         <span className="text-sm">
           {" "}
           {"["}
-          {swapContractReserve0}, {swapContractReserve1}
+          {poolReserve[srcTokenID]}, {poolReserve[tarTokenID]}
           {"]"}
         </span>
       </p>
@@ -49,10 +46,12 @@ function SwapContractInfo(props) {
         {/* </b> */}
       </p>
       <p className="p-1 text-slate-500">
-        TokenSymbol: {srcTokenSymbol}, TokenName: {srcTokenName}
+        TokenSymbol: {tokenInfo[srcTokenID].symbol}, TokenName:{" "}
+        {tokenInfo[srcTokenID].name}
       </p>
       <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{srcTokenAddress}</span>
+        Address:{" "}
+        <span className="text-sm">{tokenInfo[srcTokenID].address}</span>
       </p>
 
       <p className="pt-2 p-1">
@@ -61,10 +60,12 @@ function SwapContractInfo(props) {
         {/* </b> */}
       </p>
       <p className="p-1 text-slate-500">
-        TokenSymbol: {tarTokenSymbol}, TokenName: {tarTokenName}
+        TokenSymbol: {tokenInfo[tarTokenID].symbol}, TokenName:{" "}
+        {tokenInfo[tarTokenID].name}
       </p>
       <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{tarTokenAddress}</span>
+        Address:{" "}
+        <span className="text-sm">{tokenInfo[tarTokenID].address}</span>
       </p>
     </fieldset>
   );
