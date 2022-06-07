@@ -6,7 +6,11 @@ function SwapCurrencyInput(props) {
   function handleTokenInputChange(e) {
     console.log("handle on token input: pass input value");
 
-    props.onTokenAmountChange(e.target.value);
+    // allow only numbers and dot
+    const re = /^[0-9]*\.?[0-9]*$/;
+    if (e.target.value === "" || re.test(e.target.value)) {
+      props.onTokenAmountChange(e.target.value);
+    }
   }
 
   return (

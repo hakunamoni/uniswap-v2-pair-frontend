@@ -12,7 +12,6 @@ function SwapPage(props) {
 
   const [focusInputPos, setFocusInputPos] = useState(true); // true: "up", false: "down"
   const [sourceTokenID, setSourceTokenID] = useState("b"); // "a" or "b"
-  const [targetTokenID, setTargetTokenID] = useState("a"); // "a" or "b"
   const [tokens, setTokens] = useState({ a: undefined, b: undefined });
   const [tokenInfo, setTokenInfo] = useState({
     a: { name: undefined, symbol: undefined, address: undefined },
@@ -32,10 +31,18 @@ function SwapPage(props) {
   });
   const [sourceTokenAmt, setSourceTokenAmt] = useState(undefined);
   const [targetTokenAmt, setTargetTokenAmt] = useState(undefined);
-  const [target2sourceRate, setTarget2sourceRate] = useState(undefined);
   const [isDirectionClick, setIsDirectionClick] = useState(true);
   const [isDoSwapClick, setIsDoSwapClick] = useState(false);
   // const [isApproveClick, setIsApproveClick] = useState(false);
+
+  const targetTokenID = sourceTokenID === "a" ? "b" : "a";
+  const target2sourceRate =
+    targetTokenAmt &&
+    sourceTokenAmt &&
+    Number(targetTokenAmt) !== 0 &&
+    Number(sourceTokenAmt) !== 0
+      ? (Number(sourceTokenAmt) / Number(targetTokenAmt)).toFixed(7)
+      : undefined;
 
   const uniswapProvider = new ethers.Contract(
     SWAP_CONTRACT_ADDRESS,
@@ -149,37 +156,24 @@ function SwapPage(props) {
     fetchData();
   }, [currentAccount, tokens, isDoSwapClick]);
 
-  // set target-to-source rate
-  useEffect(() => {
-    console.log("useEffect: set target-to-source rate");
-
-    if (
-      targetTokenAmt &&
-      sourceTokenAmt &&
-      Number(targetTokenAmt) !== 0 &&
-      Number(sourceTokenAmt) !== 0
-    ) {
-      const rate = (Number(sourceTokenAmt) / Number(targetTokenAmt)).toFixed(7);
-      setTarget2sourceRate(rate);
-    } else {
-      setTarget2sourceRate(undefined);
-    }
-  }, [sourceTokenAmt, targetTokenAmt]);
-
   // set target token amount
   useEffect(() => {
     console.log("useEffect: set target token amount");
 
-    if (focusInputPos && sourceTokenAmt && Number(sourceTokenAmt) !== 0) {
-      uniswapProvider
-        .getSwapTargetAmount(
-          tokenInfo[sourceTokenID].address,
-          parseEther(sourceTokenAmt)
-        )
-        .then((result) => {
-          setTargetTokenAmt(ethers.utils.formatEther(result));
-        })
-        .catch("error", console.error);
+    if (focusInputPos) {
+      if (sourceTokenAmt && Number(sourceTokenAmt) !== 0) {
+        uniswapProvider
+          .getSwapTargetAmount(
+            tokenInfo[sourceTokenID].address,
+            parseEther(sourceTokenAmt)
+          )
+          .then((result) => {
+            setTargetTokenAmt(ethers.utils.formatEther(result));
+          })
+          .catch("error", console.error);
+      } else {
+        setTargetTokenAmt(undefined);
+      }
     }
   }, [sourceTokenAmt, focusInputPos, sourceTokenID, tokenInfo]);
 
@@ -187,17 +181,21 @@ function SwapPage(props) {
   useEffect(() => {
     console.log("useEffect: set source token amount");
 
-    if (!focusInputPos && targetTokenAmt && Number(targetTokenAmt) !== 0) {
-      if (Number(targetTokenAmt) < Number(poolReserve[targetTokenID]))
-        uniswapProvider
-          .getSwapSourceAmount(
-            tokenInfo[targetTokenID].address,
-            parseEther(targetTokenAmt)
-          )
-          .then((result) => {
-            setSourceTokenAmt(ethers.utils.formatEther(result));
-          })
-          .catch("error", console.error);
+    if (!focusInputPos) {
+      if (targetTokenAmt && Number(targetTokenAmt) !== 0) {
+        if (Number(targetTokenAmt) < Number(poolReserve[targetTokenID]))
+          uniswapProvider
+            .getSwapSourceAmount(
+              tokenInfo[targetTokenID].address,
+              parseEther(targetTokenAmt)
+            )
+            .then((result) => {
+              setSourceTokenAmt(ethers.utils.formatEther(result));
+            })
+            .catch("error", console.error);
+      } else {
+        setSourceTokenAmt(undefined);
+      }
     }
   }, [targetTokenAmt, focusInputPos, poolReserve, targetTokenID, tokenInfo]);
 
@@ -208,9 +206,8 @@ function SwapPage(props) {
     // invert selected currency input position
     setFocusInputPos(!focusInputPos);
 
-    // exchange source,target token id
+    // update source token id
     setSourceTokenID(targetTokenID);
-    setTargetTokenID(sourceTokenID);
 
     // update source/target token amount
     focusInputPos
