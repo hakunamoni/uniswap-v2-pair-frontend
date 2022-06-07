@@ -1,12 +1,16 @@
 import React from "react";
 
 function PoolCurrencyInput(props) {
-  const { formType, tokenAmount, tokenBalance, tokenName, tokenSymbol } = props;
+  const { formType, tokenAmount, tokenBalance, tokenSymbol } = props;
 
   function handleTokenInputChange(e) {
     console.log("handle on token input: pass input value");
 
-    props.onTokenAmountChange(e.target.value);
+    // allow only numbers and dot
+    const re = /^[0-9]*\.?[0-9]*$/;
+    if (e.target.value === "" || re.test(e.target.value)) {
+      props.onTokenAmountChange(e.target.value);
+    }
   }
 
   return (
@@ -15,9 +19,10 @@ function PoolCurrencyInput(props) {
         Token {formType} - <b>{tokenSymbol} </b>
       </legend>
       <input
-        value={tokenAmount}
+        value={tokenAmount || ""}
         onChange={handleTokenInputChange}
         className="p-1 border-2 border-white w-full bg-slate-100 rounded-xl"
+        placeholder="0.0"
       />
       <p className="p-1 text-slate-500">Balance: {tokenBalance}</p>
     </fieldset>

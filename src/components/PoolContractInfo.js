@@ -2,29 +2,54 @@ import React from "react";
 
 function PoolContractInfo(props) {
   const {
-    // tar2srcRate,
     swapContractAddress,
-    swapContractReserve0,
-    swapContractReserve1,
-    srcTokenName,
-    srcTokenSymbol,
-    srcTokenAddress,
-    tarTokenName,
-    tarTokenSymbol,
-    tarTokenAddress,
+    poolReserve,
+    tokenInfo,
+    liquidityRate,
+    shareOfPool,
+    totalSupply,
+    liquidityBalance,
+    liquidityNewEstimate,
   } = props;
 
   return (
-    <fieldset className="overflow-auto h-32 w-96 mx-auto bg-slate-100 rounded-xl">
-      {/* {tar2srcRate ? (
+    <fieldset className="overflow-auto h-48 w-96 mx-auto bg-slate-100 rounded-xl">
+      <p className="pt-2 p-1">
+        {/* <b className=""> */}
+        Prices and pool share
+        {/* </b> */}
+      </p>
+      {liquidityRate.bPerARate ? (
         <p className="p-1 text-slate-500">
-          <b>
-            1 {tarTokenSymbol} = {tar2srcRate} {srcTokenSymbol}
-          </b>
+          {tokenInfo.b.symbol} per {tokenInfo.a.symbol}:{" "}
+          {liquidityRate.bPerARate}
+          {/* <span className="text-sm">{swapContractAddress}</span> */}
         </p>
       ) : (
         <></>
-      )} */}
+      )}
+      {liquidityRate.aPerBRate ? (
+        <p className="p-1 text-slate-500">
+          {tokenInfo.a.symbol} per {tokenInfo.b.symbol}:{" "}
+          {liquidityRate.aPerBRate}
+          {/* <span className="text-sm">{swapContractAddress}</span> */}
+        </p>
+      ) : (
+        <></>
+      )}
+      {shareOfPool ? (
+        <p className="p-1 text-slate-500">Share of Pool: {shareOfPool}%</p>
+      ) : (
+        <></>
+      )}
+      {liquidityNewEstimate ? (
+        <p className="p-1 text-slate-500">
+          Estimated liquidity: {liquidityNewEstimate}
+        </p>
+      ) : (
+        <></>
+      )}
+
       <p className="pt-2 p-1">
         {/* <b className=""> */}
         Pool contract information
@@ -35,9 +60,15 @@ function PoolContractInfo(props) {
       </p>
       <p className="p-1 text-slate-500">
         Reserves: {"["}
-        {swapContractReserve0}, {swapContractReserve1}
+        {poolReserve.a}, {poolReserve.b}
         {"]"}
       </p>
+      <p className="p-1 text-slate-500">Total supply: {totalSupply}</p>
+      {liquidityBalance ? (
+        <p className="p-1 text-slate-500">Balance of: {liquidityBalance}</p>
+      ) : (
+        <></>
+      )}
 
       <p className="pt-2 p-1">
         {/* <b className=""> */}
@@ -45,10 +76,10 @@ function PoolContractInfo(props) {
         {/* </b> */}
       </p>
       <p className="p-1 text-slate-500">
-        TokenSymbol: {srcTokenSymbol}, TokenName: {srcTokenName}
+        TokenSymbol: {tokenInfo.a.symbol}, TokenName: {tokenInfo.a.name}
       </p>
       <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{srcTokenAddress}</span>
+        Address: <span className="text-sm">{tokenInfo.a.address}</span>
       </p>
 
       <p className="pt-2 p-1">
@@ -57,10 +88,10 @@ function PoolContractInfo(props) {
         {/* </b> */}
       </p>
       <p className="p-1 text-slate-500">
-        TokenSymbol: {tarTokenSymbol}, TokenName: {tarTokenName}
+        TokenSymbol: {tokenInfo.b.symbol}, TokenName: {tokenInfo.b.name}
       </p>
       <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{tarTokenAddress}</span>
+        Address: <span className="text-sm">{tokenInfo.b.address}</span>
       </p>
     </fieldset>
   );
