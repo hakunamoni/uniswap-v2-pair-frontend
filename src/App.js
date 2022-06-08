@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,6 +13,7 @@ import { ethers } from "ethers";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
 import PoolPage from "./pages/PoolPage";
+import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { INFURA_PROJECT_ID } from "./constants/misc";
 
 export const AccountContext = React.createContext({
@@ -72,7 +73,7 @@ function App() {
     >
       <Router>
         <Routes>
-          <Route path="/" element={<Header />}>
+          <Route path="/" element={<Header provider={provider} />}>
             <Route index path="/" element={<Navigate to="swap" />} />
             <Route
               path="swap"
@@ -102,7 +103,9 @@ function App() {
   );
 }
 
-function Header() {
+function Header(props) {
+  const { provider } = props;
+
   return (
     <div className="h-screen w-screen	m-auto bg-sky-100">
       <h1 className="text-center text-2xl font-bold py-5">
@@ -120,17 +123,42 @@ function Header() {
 
       <Outlet />
 
-      <Footer />
+      <Footer provider={provider} />
     </div>
   );
 }
 
-function Footer() {
+function Footer(props) {
   const { currentAccount, handleDisconnectMetamask, handleConnectMetamask } =
     useContext(AccountContext);
+  const { provider } = props;
+
+  const [ethBalance, setEthBalance] = useState(undefined);
+  const [chainInfo, setChainInfo] = useState({
+    id: undefined,
+    name: undefined,
+  });
+
+  useEffect(() => {
+    console.log("useEffect: set account information for currentAccount");
+
+    if (currentAccount && ethers.utils.isAddress(currentAccount)) {
+      async function fetchData() {
+        // get eth balance, chain info
+        const [ethBal, chainInfo] = await Promise.all([
+          provider.getBalance(currentAccount),
+          provider.getNetwork(),
+        ]);
+
+        setEthBalance(ethers.utils.formatEther(ethBal));
+        setChainInfo({ id: chainInfo.chainId, name: chainInfo.name });
+      }
+      fetchData();
+    }
+  }, [currentAccount]);
 
   return (
-    <div className="w-fit mx-auto mt-6 bg-white rounded-xl shadow-lg">
+    <div className="w-fit mx-auto mt-6 rounded-xl shadow-lg">
       {currentAccount ? (
         <button
           className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
@@ -145,6 +173,16 @@ function Footer() {
         >
           <b>Connect MetaMask</b>
         </button>
+      )}
+      {currentAccount ? (
+        <MetamaskAccountInfo
+          currentAccount={currentAccount}
+          ethBalance={ethBalance}
+          chainId={chainInfo.id}
+          chainName={chainInfo.name}
+        />
+      ) : (
+        <div className="w-96"></div>
       )}
     </div>
   );
