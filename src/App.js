@@ -103,34 +103,13 @@ function App() {
 }
 
 function Header() {
-  const { currentAccount, handleDisconnectMetamask, handleConnectMetamask } =
-    useContext(AccountContext);
-
   return (
     <div className="h-screen w-screen	m-auto bg-sky-100">
       <h1 className="text-center text-2xl font-bold py-5">
         Uniswap V2 Pair (Mini) - D. S.
       </h1>
 
-      <div className="w-fit mx-auto bg-white rounded-xl shadow-lg">
-        {currentAccount ? (
-          <button
-            className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-            onClick={handleDisconnectMetamask}
-          >
-            <b>Disconnect MetaMask</b>
-          </button>
-        ) : (
-          <button
-            className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
-            onClick={handleConnectMetamask}
-          >
-            <b>Connect MetaMask</b>
-          </button>
-        )}
-      </div>
-
-      <div className="m-5 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
+      <div className="mb-6 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
         <CustomLink to="/swap">
           <b>Swap</b>
         </CustomLink>
@@ -140,6 +119,33 @@ function Header() {
       </div>
 
       <Outlet />
+
+      <Footer />
+    </div>
+  );
+}
+
+function Footer() {
+  const { currentAccount, handleDisconnectMetamask, handleConnectMetamask } =
+    useContext(AccountContext);
+
+  return (
+    <div className="w-fit mx-auto mt-6 bg-white rounded-xl shadow-lg">
+      {currentAccount ? (
+        <button
+          className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
+          onClick={handleDisconnectMetamask}
+        >
+          <b>Disconnect MetaMask</b>
+        </button>
+      ) : (
+        <button
+          className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
+          onClick={handleConnectMetamask}
+        >
+          <b>Connect MetaMask</b>
+        </button>
+      )}
     </div>
   );
 }
@@ -149,7 +155,6 @@ function CustomLink({ children, to, ...props }) {
   let match = useMatch({ path: resolved.pathname, end: true });
 
   return (
-    // <div className="content-center bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[32px] py-[12px]">
     <Link
       style={{
         color: match ? "white" : "rgb(2 132 199)",

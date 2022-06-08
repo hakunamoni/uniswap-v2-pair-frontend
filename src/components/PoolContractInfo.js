@@ -10,33 +10,40 @@ function PoolContractInfo(props) {
     totalSupply,
     liquidityBalance,
     liquidityNewEstimate,
+    txHash,
   } = props;
 
   return (
     <fieldset className="overflow-auto h-48 w-96 mx-auto bg-slate-100 rounded-xl">
-      <p className="pt-2 p-1">
-        {/* <b className=""> */}
-        Prices and pool share
-        {/* </b> */}
-      </p>
-      {liquidityRate.bPerARate ? (
+      {txHash ? (
+        <p className="p-1 text-slate-500">
+          Provide Tx hash:{" "}
+          <a
+            href={"https://ropsten.etherscan.io/tx/" + txHash}
+            className="text-blue-800"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {txHash.slice(0, 15)}...{txHash.slice(-5)}
+          </a>
+        </p>
+      ) : (
+        <></>
+      )}
+
+      <p className="pt-2 p-1">Prices and pool share</p>
+      {liquidityRate.bPerARate && liquidityRate.aPerBRate ? (
         <p className="p-1 text-slate-500">
           {tokenInfo.b.symbol} per {tokenInfo.a.symbol}:{" "}
           {liquidityRate.bPerARate}
-          {/* <span className="text-sm">{swapContractAddress}</span> */}
-        </p>
-      ) : (
-        <></>
-      )}
-      {liquidityRate.aPerBRate ? (
-        <p className="p-1 text-slate-500">
+          {", "}
           {tokenInfo.a.symbol} per {tokenInfo.b.symbol}:{" "}
           {liquidityRate.aPerBRate}
-          {/* <span className="text-sm">{swapContractAddress}</span> */}
         </p>
       ) : (
         <></>
       )}
+
       {shareOfPool ? (
         <p className="p-1 text-slate-500">Share of Pool: {shareOfPool}%</p>
       ) : (
@@ -50,22 +57,35 @@ function PoolContractInfo(props) {
         <></>
       )}
 
-      <p className="pt-2 p-1">
-        {/* <b className=""> */}
-        Pool contract information
-        {/* </b> */}
-      </p>
-      <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{swapContractAddress}</span>
-      </p>
-      <p className="p-1 text-slate-500">
-        Reserves: <br />
-        <span className="text-sm">
-          {"["}
-          {poolReserve.a}, {poolReserve.b}
+      <p className="pt-2 p-1">Pool contract information</p>
+
+      {swapContractAddress ? (
+        <p className="p-1 text-slate-500">
+          Contract:{" "}
+          <a
+            href={"https://ropsten.etherscan.io/token/" + swapContractAddress}
+            className="text-blue-800"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {swapContractAddress.slice(0, 15)}...{swapContractAddress.slice(-5)}
+          </a>
+        </p>
+      ) : (
+        <></>
+      )}
+
+      {poolReserve.a && poolReserve.b ? (
+        <p className="p-1 text-slate-500">
+          Pool reserves:
+          {" ["}
+          {Number(poolReserve.a).toFixed(7)}, {Number(poolReserve.b).toFixed(7)}
           {"]"}
-        </span>
-      </p>
+        </p>
+      ) : (
+        <></>
+      )}
+
       <p className="p-1 text-slate-500">Total supply: {totalSupply}</p>
       {liquidityBalance ? (
         <p className="p-1 text-slate-500">Balance of: {liquidityBalance}</p>
@@ -73,28 +93,46 @@ function PoolContractInfo(props) {
         <></>
       )}
 
-      <p className="pt-2 p-1">
-        {/* <b className=""> */}
-        Source token information
-        {/* </b> */}
-      </p>
+      <p className="pt-2 p-1">Token A information</p>
+      {tokenInfo.a.address ? (
+        <p className="p-1 text-slate-500">
+          Token:{" "}
+          <a
+            href={"https://ropsten.etherscan.io/token/" + tokenInfo.a.address}
+            className="text-blue-800"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {tokenInfo.a.address.slice(0, 15)}...
+            {tokenInfo.a.address.slice(-5)}
+          </a>
+        </p>
+      ) : (
+        <></>
+      )}
       <p className="p-1 text-slate-500">
-        TokenSymbol: {tokenInfo.a.symbol}, TokenName: {tokenInfo.a.name}
-      </p>
-      <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{tokenInfo.a.address}</span>
+        Token symbol: {tokenInfo.a.symbol}, Token name: {tokenInfo.a.name}
       </p>
 
-      <p className="pt-2 p-1">
-        {/* <b className=""> */}
-        Target token information
-        {/* </b> */}
-      </p>
+      <p className="pt-2 p-1">Token B information</p>
+      {tokenInfo.b.address ? (
+        <p className="p-1 text-slate-500">
+          Token:{" "}
+          <a
+            href={"https://ropsten.etherscan.io/token/" + tokenInfo.b.address}
+            className="text-blue-800"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {tokenInfo.b.address.slice(0, 15)}...
+            {tokenInfo.b.address.slice(-5)}
+          </a>
+        </p>
+      ) : (
+        <></>
+      )}
       <p className="p-1 text-slate-500">
-        TokenSymbol: {tokenInfo.b.symbol}, TokenName: {tokenInfo.b.name}
-      </p>
-      <p className="p-1 text-slate-500">
-        Address: <span className="text-sm">{tokenInfo.b.address}</span>
+        Token symbol: {tokenInfo.b.symbol}, Token name: {tokenInfo.b.name}
       </p>
     </fieldset>
   );
