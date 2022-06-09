@@ -104,15 +104,13 @@ function App() {
 }
 
 function Header(props) {
-  const { provider } = props;
-
   return (
     <div className="h-screen w-screen	m-auto bg-sky-100">
       <h1 className="text-center text-2xl font-bold py-5">
         Uniswap V2 Pair (Mini) - D. S.
       </h1>
 
-      <div className="mb-6 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
+      <div className="mb-4 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
         <CustomLink to="/swap">
           <b>Swap</b>
         </CustomLink>
@@ -123,7 +121,7 @@ function Header(props) {
 
       <Outlet />
 
-      <Footer provider={provider} />
+      <Footer provider={props.provider} />
     </div>
   );
 }
@@ -158,7 +156,7 @@ function Footer(props) {
   }, [currentAccount]);
 
   return (
-    <div className="w-fit mx-auto mt-6 rounded-xl shadow-lg">
+    <div className="w-fit mx-auto mt-4 rounded-xl shadow-lg">
       {currentAccount ? (
         <button
           className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
