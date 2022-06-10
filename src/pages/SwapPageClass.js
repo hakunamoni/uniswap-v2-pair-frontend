@@ -267,6 +267,7 @@ class SwapPageClass extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     console.log("componentDidUpdate");
+
     this.targetTokenID = this.state.sourceTokenID === "a" ? "b" : "a";
 
     if (
@@ -339,7 +340,7 @@ class SwapPageClass extends Component {
   handleDoSwapClick() {
     console.log("click on swap button: swap tokens");
 
-    const signer = this.provider.getSigner();
+    const signer = this.props.provider.getSigner();
     const uniswapSigner = new ethers.Contract(
       SWAP_CONTRACT_ADDRESS,
       abiUniswap,
@@ -348,8 +349,8 @@ class SwapPageClass extends Component {
 
     uniswapSigner
       .swap(
-        this.tokenInfo[this.sourceTokenID].address,
-        parseEther(this.sourceTokenAmt.toString())
+        this.state.tokenInfo[this.state.sourceTokenID].address,
+        parseEther(this.state.sourceTokenAmt.toString())
       )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
@@ -369,9 +370,9 @@ class SwapPageClass extends Component {
   handleApproveClick() {
     console.log("click on approve protocol button: approve 1000 ethers");
 
-    const signer = this.provider.getSigner();
+    const signer = this.props.provider.getSigner();
     const tokenASigner = new ethers.Contract(
-      this.tokenInfo[this.sourceTokenID].address,
+      this.state.tokenInfo[this.state.sourceTokenID].address,
       abiTokenMini,
       signer
     );
@@ -404,7 +405,6 @@ class SwapPageClass extends Component {
     } = this.state;
 
     const targetTokenID = sourceTokenID === "a" ? "b" : "a";
-
     const target2sourceRate =
       targetTokenAmt &&
       sourceTokenAmt &&
