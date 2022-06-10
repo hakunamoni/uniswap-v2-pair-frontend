@@ -447,7 +447,7 @@ class SwapPageClass extends Component {
             >
               <b>
                 Allow this protocol to use your{" "}
-                {tokenInfo[targetTokenID].symbol}
+                {tokenInfo[sourceTokenID].symbol}
               </b>
             </button>
           </div>

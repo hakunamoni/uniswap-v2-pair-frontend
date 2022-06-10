@@ -70,6 +70,16 @@ function PoolPage(props) {
     console.log("useEffect(mount): get token info");
 
     async function fetchData() {
+      try {
+        // get token addrs
+        const [addr0, addr1] = await Promise.all([
+          uniswapProvider.token0(),
+          uniswapProvider.token1(),
+        ]);
+      } catch (error) {
+        console.log("hello", uniswapProvider);
+      }
+
       // get token addrs
       const [addr0, addr1] = await Promise.all([
         uniswapProvider.token0(),
@@ -329,7 +339,23 @@ function PoolPage(props) {
         onTokenAmountChange={handleBTokenAmount}
       />
 
-      {Number(tokenAllowances.a) < Number(aTokenInputAmt) ? (
+      {Number(tokenAllowances.a) < Number(aTokenInputAmt) &&
+      Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
+        <div className="w-96">
+          <button
+            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveAClick}
+          >
+            <b>Approve {tokenInfo.a.symbol}</b>
+          </button>
+          <button
+            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+            onClick={handleProtocolApproveBClick}
+          >
+            <b>Approve {tokenInfo.b.symbol}</b>
+          </button>
+        </div>
+      ) : Number(tokenAllowances.a) < Number(aTokenInputAmt) ? (
         <div className="w-96">
           <button
             className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
@@ -381,22 +407,6 @@ function PoolPage(props) {
             <b>Processing...</b>
           </div>
         </button>
-      ) : Number(tokenAllowances.a) < Number(aTokenInputAmt) &&
-        Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
-        <div className="w-96">
-          <button
-            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveAClick}
-          >
-            <b>Approve {tokenInfo.a.symbol}</b>
-          </button>
-          <button
-            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveBClick}
-          >
-            <b>Approve {tokenInfo.b.symbol}</b>
-          </button>
-        </div>
       ) : currentAccount ? (
         !aTokenInputAmt ||
         !bTokenInputAmt ||

@@ -320,7 +320,7 @@ function SwapPage(props) {
             onClick={handleApproveClick}
           >
             <b>
-              Allow this protocol to use your {tokenInfo[targetTokenID].symbol}
+              Allow this protocol to use your {tokenInfo[sourceTokenID].symbol}
             </b>
           </button>
         </div>
