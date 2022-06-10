@@ -12,6 +12,7 @@ import {
 import { ethers } from "ethers";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
+import SwapPageClass from "./pages/SwapPageClass";
 import PoolPage from "./pages/PoolPage";
 import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { INFURA_PROJECT_ID } from "./constants/misc";
@@ -95,6 +96,16 @@ function App() {
                 />
               }
             />
+            <Route
+              path="swapclass"
+              element={
+                <SwapPageClass
+                  currentAccount={currentAccount}
+                  provider={provider}
+                  connectMetamask={handleConnectMetamask}
+                />
+              }
+            />{" "}
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>
@@ -117,6 +128,9 @@ function Header(props) {
         <CustomLink to="/pool">
           <b>Pool</b>
         </CustomLink>
+        <CustomLink to="/swapclass">
+          <b>SwapClass</b>
+        </CustomLink>{" "}
       </div>
 
       <Outlet />

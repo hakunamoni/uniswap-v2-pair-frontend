@@ -264,7 +264,7 @@ function SwapPage(props) {
       .catch("error", console.error);
   };
 
-  const handleProtocolApproveClick = () => {
+  const handleApproveClick = () => {
     console.log("click on approve protocol button: approve 1000 ethers");
 
     const signer = provider.getSigner();
@@ -317,7 +317,7 @@ function SwapPage(props) {
         <div className="w-96">
           <button
             className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveClick}
+            onClick={handleApproveClick}
           >
             <b>
               Allow this protocol to use your {tokenInfo[targetTokenID].symbol}
