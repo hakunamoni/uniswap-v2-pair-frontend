@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
 import SwapCurrencyInput from "../components/SwapCurrencyInput";
 import SwapContractInfo from "../components/SwapContractInfo";
-import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
+import ButtonSpin from "../components/ButtonSpin";
 
 function SwapPage(props) {
   const { currentAccount, provider, connectMetamask } = props;
@@ -35,7 +36,8 @@ function SwapPage(props) {
   const [isDirectionClick, setIsDirectionClick] = useState(true);
   const [isDoSwapClick, setIsDoSwapClick] = useState(false);
   const [isApproveClick, setIsApproveClick] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingApprove, setIsProcessingApprove] = useState(false);
+  const [isProcessingSwap, setIsProcessingSwap] = useState(false);
   const [swapTxHash, setSwapTxHash] = useState(undefined);
 
   const target2sourceRate =
@@ -149,7 +151,7 @@ function SwapPage(props) {
       }
     }
     fetchData();
-  }, [currentAccount, tokens, isDoSwapClick]);
+  }, [currentAccount, tokens, isDoSwapClick, isApproveClick]);
 
   // set target token amount
   useEffect(() => {
@@ -251,13 +253,13 @@ function SwapPage(props) {
       )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
-        setIsProcessing(true);
+        setIsProcessingSwap(true);
         setSwapTxHash(tr.hash);
 
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
 
-          setIsProcessing(false);
+          setIsProcessingSwap(false);
           setIsDoSwapClick(!isDoSwapClick);
         });
       })
@@ -275,17 +277,62 @@ function SwapPage(props) {
     );
 
     tokenASigner
-      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther(sourceTokenAmt))
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        setIsProcessingApprove(true);
+
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
 
+          setIsProcessingApprove(false);
           setIsApproveClick(!isApproveClick);
         });
       })
       .catch("error", console.error);
   };
+
+  const btnText =
+    Number(targetTokenAmt) > Number(poolReserve[targetTokenID]) ? (
+      <b>Insufficient Reserve {tokenInfo[targetTokenID].symbol} balance</b>
+    ) : currentAccount ? (
+      !sourceTokenAmt ||
+      !targetTokenAmt ||
+      Number(sourceTokenAmt) === 0 ||
+      Number(targetTokenAmt) === 0 ? (
+        <b>Enter an amount</b>
+      ) : Number(sourceTokenAmt) > Number(tokenBalances[sourceTokenID]) ? (
+        <b>Insufficient {tokenInfo[sourceTokenID].symbol} balance</b>
+      ) : (
+        <b>Swap</b>
+      )
+    ) : (
+      <b>Connect MetaMask</b>
+    );
+
+  let btnDisabled;
+  if (Number(targetTokenAmt) > Number(poolReserve[targetTokenID])) {
+    btnDisabled = true;
+  } else if (currentAccount) {
+    if (
+      !sourceTokenAmt ||
+      !targetTokenAmt ||
+      Number(sourceTokenAmt) === 0 ||
+      Number(targetTokenAmt) === 0 ||
+      Number(sourceTokenAmt) > Number(tokenBalances[sourceTokenID]) ||
+      Number(sourceTokenAmt) > Number(tokenAllowances[sourceTokenID])
+    ) {
+      btnDisabled = true;
+    } else {
+      btnDisabled = isProcessingSwap;
+    }
+  } else {
+    btnDisabled = false;
+  }
+
+  // const btnOnClick = () => {
+  //   currentAccount ? handleDoSwapClick() : connectMetamask();
+  // };
 
   return (
     <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
@@ -299,7 +346,7 @@ function SwapPage(props) {
       />
       <div className="w-full flex">
         <button
-          className="mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]"
+          className="mx-auto mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-full px-[12px] py-[6px]"
           onClick={handleDirectionClick}
         >
           <b>&darr;</b>
@@ -313,95 +360,27 @@ function SwapPage(props) {
         onTokenAmountChange={handleTargetTokenAmount}
       />
 
-      {Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt) ? (
-        <div className="w-96">
-          <button
-            className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleApproveClick}
-          >
-            <b>
-              Allow this protocol to use your {tokenInfo[sourceTokenID].symbol}
-            </b>
-          </button>
-        </div>
-      ) : (
-        <></>
+      {Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt) && (
+        <ButtonSpin
+          className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+          disabled={isProcessingApprove}
+          isLoading={isProcessingApprove}
+          onClick={handleApproveClick}
+        >
+          <b>
+            Allow this protocol to use your {tokenInfo[sourceTokenID].symbol}
+          </b>
+        </ButtonSpin>
       )}
 
-      {isProcessing ? (
-        <button
-          className="w-full flex bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-          disabled={true}
-        >
-          {" "}
-          <div className="flex mx-auto">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <b>Processing...</b>
-          </div>
-        </button>
-      ) : Number(targetTokenAmt) > Number(poolReserve[targetTokenID]) ? (
-        <button
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-          disabled={true}
-        >
-          <b>Insufficient Reserve {tokenInfo[targetTokenID].symbol} balance</b>
-        </button>
-      ) : currentAccount ? (
-        !sourceTokenAmt ||
-        !targetTokenAmt ||
-        Number(sourceTokenAmt) === 0 ||
-        Number(targetTokenAmt) === 0 ? (
-          <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-            disabled={true}
-          >
-            <b>Enter an amount</b>
-          </button>
-        ) : Number(sourceTokenAmt) > Number(tokenBalances[sourceTokenID]) ? (
-          <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-            disabled={true}
-          >
-            <b>Insufficient {tokenInfo[sourceTokenID].symbol} balance</b>
-          </button>
-        ) : (
-          <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-            disabled={
-              Number(tokenAllowances[sourceTokenID]) < Number(sourceTokenAmt)
-            }
-            onClick={handleDoSwapClick}
-          >
-            <b>Swap</b>
-          </button>
-        )
-      ) : (
-        <button
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-          onClick={connectMetamask}
-        >
-          <b>Connect MetaMask</b>
-        </button>
-      )}
+      <ButtonSpin
+        className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+        disabled={btnDisabled}
+        isLoading={isProcessingSwap}
+        onClick={currentAccount ? handleDoSwapClick : connectMetamask}
+      >
+        {btnText}
+      </ButtonSpin>
 
       <SwapContractInfo
         tar2srcRate={target2sourceRate}

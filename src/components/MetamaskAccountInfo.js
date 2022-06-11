@@ -26,7 +26,7 @@ function MetamaskAccountInfo(props) {
 
       <p className="p-1 text-slate-500">Eth balance: {ethBalance}</p>
 
-      <p className="pt-2 p-1">Chain information</p>
+      {/* <p className="pt-2 p-1">Chain information</p> */}
       <p className="p-1 text-slate-500">
         Chain id: {chainId}, Chain name: {chainName}
       </p>

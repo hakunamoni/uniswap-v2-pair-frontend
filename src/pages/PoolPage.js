@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
 import abiUniswap from "../abi/UniswapV2MiniABI";
 import abiTokenMini from "../abi/TokenMiniABI";
 import PoolCurrencyInput from "../components/PoolCurrencyInput";
 import PoolContractInfo from "../components/PoolContractInfo";
-import { SWAP_CONTRACT_ADDRESS } from "../constants/misc";
+import ButtonSpin from "../components/ButtonSpin";
 
 function PoolPage(props) {
   const { currentAccount, provider, connectMetamask } = props;
@@ -34,7 +35,9 @@ function PoolPage(props) {
   const [liquidityNewEstimate, setLiquidityNewEstimate] = useState(undefined);
   const [isProvideClick, setIsProvideClick] = useState(false);
   const [isApproveClick, setIsApproveClick] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingProvide, setIsProcessingProvide] = useState(false);
+  const [isProcessingApproveA, setIsProcessingApproveA] = useState(false);
+  const [isProcessingApproveB, setIsProcessingApproveB] = useState(false);
   const [provideTxHash, setProvideTxHash] = useState(undefined);
 
   const addLiquidityRate =
@@ -183,12 +186,16 @@ function PoolPage(props) {
           a: ethers.utils.formatEther(allow0),
           b: ethers.utils.formatEther(allow1),
         });
+        console.log(
+          ethers.utils.formatEther(allow0),
+          ethers.utils.formatEther(allow1)
+        );
       } else {
         setTokenAllowances({ a: undefined, b: undefined });
       }
     }
     fetchData();
-  }, [currentAccount, tokens, isProvideClick]);
+  }, [currentAccount, tokens, isProvideClick, isApproveClick]);
 
   // reset A/B token amount as 0
   useEffect(() => {
@@ -246,13 +253,13 @@ function PoolPage(props) {
       )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
-        setIsProcessing(true);
+        setIsProcessingProvide(true);
         setProvideTxHash(tr.hash);
 
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
 
-          setIsProcessing(false);
+          setIsProcessingProvide(false);
           setIsProvideClick(!isProvideClick);
         });
       })
@@ -270,12 +277,15 @@ function PoolPage(props) {
     );
 
     tokenASigner
-      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther(aTokenInputAmt))
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        setIsProcessingApproveA(true);
+
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
 
+          setIsProcessingApproveA(false);
           setIsApproveClick(!isApproveClick);
         });
       })
@@ -293,12 +303,15 @@ function PoolPage(props) {
     );
 
     tokenBSigner
-      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther(bTokenInputAmt))
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        setIsProcessingApproveB(true);
+
         tr.wait().then((receipt) => {
           console.log("transfer receipt", receipt);
 
+          setIsProcessingApproveB(false);
           setIsApproveClick(!isApproveClick);
         });
       })
@@ -327,7 +340,7 @@ function PoolPage(props) {
         onTokenAmountChange={handleATokenAmount}
       />
 
-      <div className="w-full flex">
+      <div className="w-full mt-3 flex">
         <span className="mx-auto">+</span>
       </div>
 
@@ -342,78 +355,56 @@ function PoolPage(props) {
       {Number(tokenAllowances.a) < Number(aTokenInputAmt) &&
       Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
         <div className="w-96">
-          <button
-            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveAClick}
-          >
-            <b>Approve {tokenInfo.a.symbol}</b>
-          </button>
-          <button
-            className="w-1/2 mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
-            onClick={handleProtocolApproveBClick}
-          >
-            <b>Approve {tokenInfo.b.symbol}</b>
-          </button>
-        </div>
-      ) : Number(tokenAllowances.a) < Number(aTokenInputAmt) ? (
-        <div className="w-96">
-          <button
-            className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+          <ButtonSpin
+            className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px] disabled:opacity-50"
+            disabled={isProcessingApproveA}
+            isLoading={isProcessingApproveA}
             onClick={handleProtocolApproveAClick}
           >
             <b>Allow this protocol to use your {tokenInfo.a.symbol}</b>
-          </button>
-        </div>
-      ) : Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
-        <div className="w-96">
-          <button
-            className="w-full mb-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px]"
+          </ButtonSpin>
+          <ButtonSpin
+            className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px] disabled:opacity-50"
+            disabled={isProcessingApproveB}
+            isLoading={isProcessingApproveB}
             onClick={handleProtocolApproveBClick}
           >
             <b>Allow this protocol to use your {tokenInfo.b.symbol}</b>
-          </button>
+          </ButtonSpin>
+        </div>
+      ) : Number(tokenAllowances.a) < Number(aTokenInputAmt) ? (
+        <div className="w-96">
+          <ButtonSpin
+            className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px] disabled:opacity-50"
+            disabled={isProcessingApproveA}
+            isLoading={isProcessingApproveA}
+            onClick={handleProtocolApproveAClick}
+          >
+            <b>Allow this protocol to use your {tokenInfo.a.symbol}</b>
+          </ButtonSpin>
+        </div>
+      ) : Number(tokenAllowances.b) < Number(bTokenInputAmt) ? (
+        <div className="w-96">
+          <ButtonSpin
+            className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px] disabled:opacity-50"
+            disabled={isProcessingApproveB}
+            isLoading={isProcessingApproveB}
+            onClick={handleProtocolApproveBClick}
+          >
+            <b>Allow this protocol to use your {tokenInfo.b.symbol}</b>
+          </ButtonSpin>
         </div>
       ) : (
         <></>
       )}
 
-      {isProcessing ? (
-        <button
-          className="w-full flex bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
-          disabled={true}
-        >
-          {" "}
-          <div className="flex mx-auto">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <b>Processing...</b>
-          </div>
-        </button>
-      ) : currentAccount ? (
+      {currentAccount ? (
         !aTokenInputAmt ||
         !bTokenInputAmt ||
         Number(aTokenInputAmt) === 0 ||
         Number(bTokenInputAmt) === 0 ? (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            className="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>Enter an amount</b>
@@ -421,7 +412,7 @@ function PoolPage(props) {
         ) : Number(aTokenInputAmt) > Number(tokenBalances.a) &&
           Number(bTokenInputAmt) > Number(tokenBalances.b) ? (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            className="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>
@@ -430,33 +421,35 @@ function PoolPage(props) {
           </button>
         ) : Number(aTokenInputAmt) > Number(tokenBalances.a) ? (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            className="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>Insufficient {tokenInfo.a.symbol} balance</b>
           </button>
         ) : Number(bTokenInputAmt) > Number(tokenBalances.b) ? (
           <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+            className="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
             disabled={true}
           >
             <b>Insufficient {tokenInfo.b.symbol} balance</b>
           </button>
         ) : (
-          <button
-            className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+          <ButtonSpin
+            className="w-full mt-3 flex mx-auto bg-sky-600 hover:bg-sky-700 text-white rounded-lg py-[6px] disabled:opacity-50"
             disabled={
+              isProcessingProvide ||
               Number(tokenAllowances.a) < Number(aTokenInputAmt) ||
               Number(tokenAllowances.b) < Number(bTokenInputAmt)
             }
+            isLoading={isProcessingProvide}
             onClick={handleDoProvideClick}
           >
             <b>Supply</b>
-          </button>
+          </ButtonSpin>
         )
       ) : (
         <button
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
+          className="w-full mt-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px] disabled:opacity-50"
           onClick={connectMetamask}
         >
           <b>Connect MetaMask</b>

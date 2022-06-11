@@ -14,7 +14,7 @@ function SwapCurrencyInput(props) {
   }
 
   return (
-    <fieldset className="mb-3 p-2 w-96 mx-auto bg-slate-100 rounded-xl">
+    <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl">
       <legend className="p-1">
         {formType} Token - <b>{tokenSymbol} </b>
       </legend>

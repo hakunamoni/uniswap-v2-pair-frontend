@@ -378,7 +378,10 @@ class SwapPageClass extends Component {
     );
 
     tokenASigner
-      .approve(SWAP_CONTRACT_ADDRESS, ethers.utils.parseEther("1000"))
+      .approve(
+        SWAP_CONTRACT_ADDRESS,
+        ethers.utils.parseEther(this.state.sourceTokenAmt)
+      )
       .then((tr) => {
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
         tr.wait().then((receipt) => {
