@@ -129,7 +129,7 @@ function Header(props) {
           <b>Pool</b>
         </CustomLink>
         <CustomLink to="/swapclass">
-          <b>SwapClass</b>
+          <b>ClassSwap</b>
         </CustomLink>{" "}
       </div>
 
