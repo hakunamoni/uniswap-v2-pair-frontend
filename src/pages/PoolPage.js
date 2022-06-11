@@ -186,10 +186,6 @@ function PoolPage(props) {
           a: ethers.utils.formatEther(allow0),
           b: ethers.utils.formatEther(allow1),
         });
-        console.log(
-          ethers.utils.formatEther(allow0),
-          ethers.utils.formatEther(allow1)
-        );
       } else {
         setTokenAllowances({ a: undefined, b: undefined });
       }
