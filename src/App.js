@@ -74,17 +74,10 @@ function App() {
     >
       <Router>
         <Routes>
-          <Route
-            path="/uniswap-v2-pair-frontend/"
-            element={<Header provider={provider} />}
-          >
+          <Route path="/" element={<Header provider={provider} />}>
+            <Route index path="/" element={<Navigate to="/swap" />} />
             <Route
-              index
-              path="/uniswap-v2-pair-frontend/"
-              element={<Navigate to="uniswap-v2-pair-frontend/swap" />}
-            />
-            <Route
-              path="uniswap-v2-pair-frontend/swap"
+              path="/swap"
               element={
                 <SwapPage
                   currentAccount={currentAccount}
@@ -94,7 +87,7 @@ function App() {
               }
             />
             <Route
-              path="uniswap-v2-pair-frontend/pool"
+              path="/pool"
               element={
                 <PoolPage
                   currentAccount={currentAccount}
