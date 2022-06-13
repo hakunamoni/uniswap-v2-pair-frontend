@@ -228,8 +228,19 @@ function NoMatch() {
   return (
     // <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
     <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
+      {/* <h2 className="text-center text-1xl font-bold py-5">
+        Uniswap V2 Pair (Mini) - D. S.
+      </h2> */}
       <p className="p-1">
-        <Link to="/">Go to the default page</Link>{" "}
+        This is the homepage of Uniswap V2 Pair {"("}Mini{")"}.<br />
+        Please click "Swap" or "Pool" button to exchange token and add a
+        liquidity.
+        <br />
+        Or please visit the default page{" "}
+        <Link to="/" className="bg-sky-600 hover:bg-sky-700 text-white">
+          here
+        </Link>
+        .{" "}
       </p>
     </fieldset>
     // </div>
