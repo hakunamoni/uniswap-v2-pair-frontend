@@ -75,9 +75,13 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Header provider={provider} />}>
-            <Route index path="/" element={<Navigate to="/swap" />} />
             <Route
-              path="/swap"
+              index
+              path="/"
+              element={<Navigate to="/uniswap-v2-pair-frontend/swap" />}
+            />
+            <Route
+              path="/uniswap-v2-pair-frontend/swap"
               element={
                 <SwapPage
                   currentAccount={currentAccount}
@@ -122,10 +126,10 @@ function Header(props) {
       </h1>
 
       <div className="mb-4 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
-        <CustomLink to="/swap">
+        <CustomLink to="/uniswap-v2-pair-frontend/swap">
           <b>Swap</b>
         </CustomLink>
-        <CustomLink to="/pool">
+        <CustomLink to="/uniswap-v2-pair-frontend/pool">
           <b>Pool</b>
         </CustomLink>
         <CustomLink to="/swapclass">
