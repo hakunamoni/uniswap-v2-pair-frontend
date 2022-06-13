@@ -91,7 +91,7 @@ function App() {
               }
             />
             <Route
-              path="/pool"
+              path="/uniswap-v2-pair-frontend/pool"
               element={
                 <PoolPage
                   currentAccount={currentAccount}
@@ -100,7 +100,7 @@ function App() {
                 />
               }
             />
-            <Route
+            {/* <Route
               path="swapclass"
               element={
                 <SwapPageClass
@@ -109,7 +109,7 @@ function App() {
                   connectMetamask={handleConnectMetamask}
                 />
               }
-            />{" "}
+            />{" "} */}
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>
@@ -132,9 +132,9 @@ function Header(props) {
         <CustomLink to="/uniswap-v2-pair-frontend/pool">
           <b>Pool</b>
         </CustomLink>
-        <CustomLink to="/swapclass">
+        {/* <CustomLink to="/swapclass">
           <b>ClassSwap</b>
-        </CustomLink>{" "}
+        </CustomLink>{" "} */}
       </div>
 
       <Outlet />
@@ -226,12 +226,19 @@ function CustomLink({ children, to, ...props }) {
 
 function NoMatch() {
   return (
-    <div>
-      <h1>Nothing to see here!</h1>
-      <p>
-        <Link to="/">Go to the home page</Link>
+    // <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
+    <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
+      <p className="p-1">
+        <Link to="/">Go to the default page</Link>{" "}
       </p>
-    </div>
+    </fieldset>
+    // </div>
+    // <div>
+    //   <h1>Nothing to see here!</h1>
+    //   <p>
+    //     <Link to="/">Go to the home page</Link>
+    //   </p>
+    // </div>
   );
 }
 
