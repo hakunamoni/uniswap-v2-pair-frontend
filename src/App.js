@@ -74,10 +74,17 @@ function App() {
     >
       <Router>
         <Routes>
-          <Route path="/" element={<Header provider={provider} />}>
-            <Route index path="/" element={<Navigate to="swap" />} />
+          <Route
+            path="/uniswap-v2-pair-frontend/"
+            element={<Header provider={provider} />}
+          >
             <Route
-              path="swap"
+              index
+              path="/uniswap-v2-pair-frontend/"
+              element={<Navigate to="uniswap-v2-pair-frontend/swap" />}
+            />
+            <Route
+              path="uniswap-v2-pair-frontend/swap"
               element={
                 <SwapPage
                   currentAccount={currentAccount}
@@ -87,7 +94,7 @@ function App() {
               }
             />
             <Route
-              path="pool"
+              path="uniswap-v2-pair-frontend/pool"
               element={
                 <PoolPage
                   currentAccount={currentAccount}
@@ -122,10 +129,10 @@ function Header(props) {
       </h1>
 
       <div className="mb-4 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
-        <CustomLink to="/swap">
+        <CustomLink to="/uniswap-v2-pair-frontend/swap">
           <b>Swap</b>
         </CustomLink>
-        <CustomLink to="/pool">
+        <CustomLink to="/uniswap-v2-pair-frontend/pool">
           <b>Pool</b>
         </CustomLink>
         <CustomLink to="/swapclass">
@@ -225,7 +232,7 @@ function NoMatch() {
     <div>
       <h1>Nothing to see here!</h1>
       <p>
-        <Link to="/">Go to the home page</Link>
+        <Link to="/uniswap-v2-pair-frontend/">Go to the home page</Link>
       </p>
     </div>
   );
