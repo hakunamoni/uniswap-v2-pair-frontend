@@ -129,10 +129,10 @@ function Header(props) {
       </h1>
 
       <div className="mb-4 p-1 w-fit mx-auto bg-white rounded-xl shadow-lg flex items-center space-x-2">
-        <CustomLink to="/uniswap-v2-pair-frontend/swap">
+        <CustomLink to="/swap">
           <b>Swap</b>
         </CustomLink>
-        <CustomLink to="/uniswap-v2-pair-frontend/pool">
+        <CustomLink to="/pool">
           <b>Pool</b>
         </CustomLink>
         <CustomLink to="/swapclass">
@@ -232,7 +232,7 @@ function NoMatch() {
     <div>
       <h1>Nothing to see here!</h1>
       <p>
-        <Link to="/uniswap-v2-pair-frontend/">Go to the home page</Link>
+        <Link to="/">Go to the home page</Link>
       </p>
     </div>
   );
