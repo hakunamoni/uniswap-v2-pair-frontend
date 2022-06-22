@@ -232,7 +232,8 @@ function NoMatch() {
         Uniswap V2 Pair (Mini) - D. S.
       </h2> */}
       <p className="p-1">
-        This is the homepage of Uniswap V2 Pair {"("}Mini{")"}.<br />
+        Thank you for taking the time to visit the homepage of Uniswap V2 Pair{" "}
+        {"("}Mini{")"}.<br />
         Please click "Swap" or "Pool" button to exchange token and add a
         liquidity.
         <br />
@@ -240,7 +241,10 @@ function NoMatch() {
         <Link to="/" className="bg-sky-600 hover:bg-sky-700 text-white">
           here
         </Link>
-        .{" "}
+        . <br />
+        This application is running on Ropsten test network and feel free to
+        send message to the following email for any issues. <br />
+        <b>hakunamoni@gmail.com</b>
       </p>
     </fieldset>
     // </div>
