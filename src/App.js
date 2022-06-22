@@ -236,8 +236,7 @@ function NoMatch() {
         {/* Thank you for taking the time to visit Uniswap V2 Pair {"("}Mini{")"}. */}
         <br />
         <br />
-        Please click "Swap" or "Pool" button to exchange token and add a
-        liquidity.
+        Please click "Swap" or "Pool" button to swap tokens and add a liquidity.
         <br />
         Or please visit the default page{" "}
         <Link to="/" className="hover:text-sky-700 text-sky-600">
@@ -246,7 +245,7 @@ function NoMatch() {
         . <br />
         <br />
         This is running on the Ropsten test network. <br />
-        Please provide any feedback to the following email. <br />
+        Please provide any feedback to this email. <br />
         <a
           className="text-sky-600 hover:text-sky-700"
           href="mailto:hakunamoni@gmail.com"
