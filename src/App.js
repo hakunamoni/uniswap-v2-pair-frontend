@@ -250,7 +250,7 @@ function NoMatch() {
           className="text-sky-600 hover:text-sky-700"
           href="mailto:hakunamoni@gmail.com"
         >
-          hakunamoni@gmail
+          hakunamoni@gmail.com
         </a>
       </p>
     </fieldset>
