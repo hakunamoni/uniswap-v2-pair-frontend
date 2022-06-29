@@ -7,7 +7,7 @@ import {
   Link,
   useMatch,
   useResolvedPath,
-  // Navigate,
+  Navigate,
 } from "react-router-dom";
 import { ethers } from "ethers";
 import "./App.css";
@@ -76,7 +76,12 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Header provider={provider} />}>
-            <Route index path="/" element={<Home />} />
+            <Route
+              index
+              path="/"
+              element={<Navigate to="/uniswap-v2-pair-frontend" />}
+            />
+            <Route index path="/uniswap-v2-pair-frontend" element={<Home />} />
             {/* <Route
               index
               path="/"
@@ -217,7 +222,7 @@ function Footer(props) {
       )}
 
       <p className="w-fit mx-auto mt-4 hover:text-sky-700 text-sky-600">
-        <Link to="/">Go to the home page</Link>
+        <Link to="/uniswap-v2-pair-frontend">Go to the home page</Link>
       </p>
     </div>
   );
