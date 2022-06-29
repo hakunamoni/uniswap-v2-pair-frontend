@@ -73,16 +73,6 @@ function PoolPage(props) {
     console.log("useEffect(mount): get token info");
 
     async function fetchData() {
-      try {
-        // get token addrs
-        const [addr0, addr1] = await Promise.all([
-          uniswapProvider.token0(),
-          uniswapProvider.token1(),
-        ]);
-      } catch (error) {
-        console.log("hello", uniswapProvider);
-      }
-
       // get token addrs
       const [addr0, addr1] = await Promise.all([
         uniswapProvider.token0(),

@@ -12,12 +12,12 @@ function SwapContractInfo(props) {
   } = props;
 
   return (
-    <fieldset className="overflow-auto h-48 w-96 mx-auto bg-slate-100 rounded-xl">
+    <fieldset className="overflow-auto h-40 w-96 mx-auto bg-slate-100 rounded-xl">
       {txHash ? (
         <p className="p-1 text-slate-500">
           Swap Tx hash:{" "}
           <a
-            href={"https://ropsten.etherscan.io/tx/" + txHash}
+            href={"https://goerli.etherscan.io/tx/" + txHash}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
@@ -45,7 +45,7 @@ function SwapContractInfo(props) {
         <p className="p-1 text-slate-500">
           Contract:{" "}
           <a
-            href={"https://ropsten.etherscan.io/token/" + swapContractAddress}
+            href={"https://goerli.etherscan.io/token/" + swapContractAddress}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
@@ -75,7 +75,7 @@ function SwapContractInfo(props) {
           Token:{" "}
           <a
             href={
-              "https://ropsten.etherscan.io/token/" +
+              "https://goerli.etherscan.io/token/" +
               tokenInfo[srcTokenID].address
             }
             className="text-blue-800"
@@ -101,7 +101,7 @@ function SwapContractInfo(props) {
           Token:{" "}
           <a
             href={
-              "https://ropsten.etherscan.io/token/" +
+              "https://goerli.etherscan.io/token/" +
               tokenInfo[tarTokenID].address
             }
             className="text-blue-800"

@@ -7,13 +7,14 @@ import {
   Link,
   useMatch,
   useResolvedPath,
-  Navigate,
+  // Navigate,
 } from "react-router-dom";
 import { ethers } from "ethers";
 import "./App.css";
 import SwapPage from "./pages/SwapPage";
-import SwapPageClass from "./pages/SwapPageClass";
+// import SwapPageClass from "./pages/SwapPageClass";
 import PoolPage from "./pages/PoolPage";
+import FaucetPage from "./pages/FaucetPage";
 import MetamaskAccountInfo from "./components/MetamaskAccountInfo";
 import { INFURA_PROJECT_ID } from "./constants/misc";
 
@@ -26,7 +27,7 @@ export const AccountContext = React.createContext({
 function App() {
   const [currentAccount, setCurrentAccount] = useState(undefined);
   const [provider, setProvider] = useState(
-    window.ethereum ? getWindowEthereumProvider() : getInfuraRopstenProvider()
+    window.ethereum ? getWindowEthereumProvider() : getInfuraGoerliProvider()
   );
 
   const handleConnectMetamask = () => {
@@ -34,7 +35,7 @@ function App() {
 
     if (!window.ethereum) {
       console.log("Please install Metamask");
-      setProvider(getInfuraRopstenProvider());
+      setProvider(getInfuraGoerliProvider());
       return undefined;
     }
 
@@ -60,7 +61,7 @@ function App() {
 
   const handleDisconnectMetamask = () => {
     console.log("onClick: disconnect Metamask");
-    setProvider(getInfuraRopstenProvider());
+    setProvider(getInfuraGoerliProvider());
     setCurrentAccount(undefined);
   };
 
@@ -75,11 +76,12 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Header provider={provider} />}>
-            <Route
+            <Route index path="/" element={<Home />} />
+            {/* <Route
               index
               path="/"
               element={<Navigate to="/uniswap-v2-pair-frontend/swap" />}
-            />
+            /> */}
             <Route
               path="/uniswap-v2-pair-frontend/swap"
               element={
@@ -110,6 +112,16 @@ function App() {
                 />
               }
             />{" "} */}
+            <Route
+              path="/uniswap-v2-pair-frontend/faucet"
+              element={
+                <FaucetPage
+                  currentAccount={currentAccount}
+                  provider={provider}
+                  connectMetamask={handleConnectMetamask}
+                />
+              }
+            />
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>
@@ -135,6 +147,9 @@ function Header(props) {
         {/* <CustomLink to="/swapclass">
           <b>ClassSwap</b>
         </CustomLink>{" "} */}
+        <CustomLink to="/uniswap-v2-pair-frontend/faucet">
+          <b>Faucet</b>
+        </CustomLink>{" "}
       </div>
 
       <Outlet />
@@ -171,10 +186,10 @@ function Footer(props) {
       }
       fetchData();
     }
-  }, [currentAccount]);
+  }, [currentAccount, provider]);
 
   return (
-    <div className="w-fit mx-auto mt-4 rounded-xl shadow-lg">
+    <div className="w-fit mx-auto mt-4 rounded-xl">
       {currentAccount ? (
         <button
           className="p-1 w-96 bg-sky-600 hover:bg-sky-700 text-white rounded-lg px-[16px] py-[6px]"
@@ -200,6 +215,10 @@ function Footer(props) {
       ) : (
         <div className="w-96"></div>
       )}
+
+      <p className="w-fit mx-auto mt-4 hover:text-sky-700 text-sky-600">
+        <Link to="/">Go to the home page</Link>
+      </p>
     </div>
   );
 }
@@ -220,31 +239,27 @@ function CustomLink({ children, to, ...props }) {
     >
       {children}
     </Link>
-    // </div>
   );
 }
 
-function NoMatch() {
+function Home() {
   return (
-    // <div className="p-3 w-fit mx-auto bg-white rounded-xl shadow-lg">
     <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
-      {/* <h2 className="text-center text-1xl font-bold py-5">
-        Uniswap V2 Pair (Mini) - D. S.
-      </h2> */}
       <p className="p-1">
-        Welcome to visit Uniswap V2 Pair {"("}Mini{")"}.
-        {/* Thank you for taking the time to visit Uniswap V2 Pair {"("}Mini{")"}. */}
+        Welcome!
+        <br /> Thanks for visiting Uniswap V2 Pair {"("}Mini{")"}.
         <br />
         <br />
         Please click "Swap" or "Pool" button to swap tokens and add a liquidity.
         <br />
-        Or please visit the default page{" "}
+        {/* Or please visit the default page{" "}
         <Link to="/" className="hover:text-sky-700 text-sky-600">
           here
         </Link>
-        . <br />
+        . <br /> */}
         <br />
-        This is running on the Ropsten test network. <br />
+        This is only compatible with the Goerli testnet. <br />
+        <br />
         Please provide any feedback to this email. <br />
         <a
           className="text-sky-600 hover:text-sky-700"
@@ -254,13 +269,17 @@ function NoMatch() {
         </a>
       </p>
     </fieldset>
-    // </div>
-    // <div>
-    //   <h1>Nothing to see here!</h1>
-    //   <p>
-    //     <Link to="/">Go to the home page</Link>
-    //   </p>
-    // </div>
+  );
+}
+
+function NoMatch() {
+  return (
+    <fieldset className="p-2 w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
+      <h1>Nothing to see here!</h1>
+      {/* <p className="w-fit mx-auto mt-4 hover:text-sky-700 text-sky-600">
+        <Link to="/">Go to the home page</Link>
+      </p> */}
+    </fieldset>
   );
 }
 
@@ -268,8 +287,8 @@ function getWindowEthereumProvider() {
   return new ethers.providers.Web3Provider(window.ethereum);
 }
 
-function getInfuraRopstenProvider() {
-  return new ethers.getDefaultProvider("ropsten", {
+function getInfuraGoerliProvider() {
+  return new ethers.getDefaultProvider("goerli", {
     infura: INFURA_PROJECT_ID,
   });
 }

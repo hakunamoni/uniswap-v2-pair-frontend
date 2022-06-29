@@ -4,14 +4,14 @@ function MetamaskAccountInfo(props) {
   const { currentAccount, ethBalance, chainId, chainName } = props;
 
   return (
-    <fieldset className="w-96 mx-auto bg-slate-100 rounded-xl">
+    <fieldset className="w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
       <p className="pt-2 p-1">Account information</p>
 
       {currentAccount ? (
         <p className="p-1 text-slate-500">
           Account:{" "}
           <a
-            href={"https://ropsten.etherscan.io/address/" + currentAccount}
+            href={"https://goerli.etherscan.io/address/" + currentAccount}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"

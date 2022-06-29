@@ -14,12 +14,12 @@ function PoolContractInfo(props) {
   } = props;
 
   return (
-    <fieldset className="overflow-auto h-48 w-96 mx-auto bg-slate-100 rounded-xl">
+    <fieldset className="overflow-auto h-40 w-96 mx-auto bg-slate-100 rounded-xl">
       {txHash ? (
         <p className="p-1 text-slate-500">
           Provide Tx hash:{" "}
           <a
-            href={"https://ropsten.etherscan.io/tx/" + txHash}
+            href={"https://goerli.etherscan.io/tx/" + txHash}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
@@ -63,7 +63,7 @@ function PoolContractInfo(props) {
         <p className="p-1 text-slate-500">
           Contract:{" "}
           <a
-            href={"https://ropsten.etherscan.io/token/" + swapContractAddress}
+            href={"https://goerli.etherscan.io/token/" + swapContractAddress}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
@@ -98,7 +98,7 @@ function PoolContractInfo(props) {
         <p className="p-1 text-slate-500">
           Token:{" "}
           <a
-            href={"https://ropsten.etherscan.io/token/" + tokenInfo.a.address}
+            href={"https://goerli.etherscan.io/token/" + tokenInfo.a.address}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
@@ -119,7 +119,7 @@ function PoolContractInfo(props) {
         <p className="p-1 text-slate-500">
           Token:{" "}
           <a
-            href={"https://ropsten.etherscan.io/token/" + tokenInfo.b.address}
+            href={"https://goerli.etherscan.io/token/" + tokenInfo.b.address}
             className="text-blue-800"
             target="_blank"
             rel="noreferrer"
