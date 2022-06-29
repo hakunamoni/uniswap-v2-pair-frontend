@@ -4,7 +4,7 @@ function FaucetContractInfo(props) {
   const { tokenInfo, tokenBalances } = props;
 
   return (
-    <fieldset className="w-96 mx-auto bg-slate-100 rounded-xl shadow-lg">
+    <fieldset className="w-96 mx-auto bg-slate-100 rounded-xl">
       {tokenInfo ? (
         <p className="pt-2 p-1">
           <b>
