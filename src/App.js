@@ -254,10 +254,10 @@ function Home() {
         Welcome!
         <br /> Thanks for visiting Uniswap V2 Pair {"("}Mini{")"}.
         <br />
-        <br />
+        {/* <br />
         Please click "Swap" or "Pool" button to swap tokens and add a liquidity.
         <br />
-        {/* Or please visit the default page{" "}
+        Or please visit the default page{" "}
         <Link to="/" className="hover:text-sky-700 text-sky-600">
           here
         </Link>
