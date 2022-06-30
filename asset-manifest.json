@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/uniswap-v2-pair-frontend/static/css/main.6f4c273d.css",
-    "main.js": "/uniswap-v2-pair-frontend/static/js/main.97ef1271.js",
+    "main.js": "/uniswap-v2-pair-frontend/static/js/main.c544c8c3.js",
     "static/js/787.91e09c66.chunk.js": "/uniswap-v2-pair-frontend/static/js/787.91e09c66.chunk.js",
     "index.html": "/uniswap-v2-pair-frontend/index.html",
     "main.6f4c273d.css.map": "/uniswap-v2-pair-frontend/static/css/main.6f4c273d.css.map",
-    "main.97ef1271.js.map": "/uniswap-v2-pair-frontend/static/js/main.97ef1271.js.map",
+    "main.c544c8c3.js.map": "/uniswap-v2-pair-frontend/static/js/main.c544c8c3.js.map",
     "787.91e09c66.chunk.js.map": "/uniswap-v2-pair-frontend/static/js/787.91e09c66.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6f4c273d.css",
-    "static/js/main.97ef1271.js"
+    "static/js/main.c544c8c3.js"
   ]
 }
